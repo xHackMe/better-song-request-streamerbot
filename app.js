@@ -31,16 +31,375 @@ function isTruthyParam(value) {
     return /^(1|true|yes|on)$/i.test(String(value || '').trim());
 }
 
+const WIDGET_LAYOUT_STORAGE_KEY = 'ytm_widget_layout_config';
+const WIDGET_LAYOUT_REVISION_KEY = 'ytm_widget_layout_revision';
+const WIDGET_LAYOUT_PRESETS_STORAGE_KEY = 'ytm_widget_layout_presets';
+const WIDGET_EDITOR_SNAP_STORAGE_KEY = 'ytm_widget_editor_snap';
+const WIDGET_EDITOR_PREVIEW_WIDTH_STORAGE_KEY = 'ytm_widget_editor_preview_width';
+const WIDGET_EDITOR_PREVIEW_HEIGHT_STORAGE_KEY = 'ytm_widget_editor_preview_height';
+const WIDGET_EDITOR_PREVIEW_MODE_STORAGE_KEY = 'ytm_widget_editor_preview_mode';
+const WIDGET_EDITOR_PREVIEW_PRESETS = {
+    default: { width: 500, height: 200 },
+    square: { width: 500, height: 500 },
+    portrait: { width: 225, height: 400 }
+};
+const WIDGET_LAYOUT_ELEMENT_KEYS = ['cover', 'infoBackground', 'title', 'author', 'requester', 'meterBackground', 'currentTime', 'waveform', 'duration', 'progress'];
+const WIDGET_LAYOUT_OBJECT_COLOR_KEYS = new Set(['infoBackground', 'meterBackground', 'requester', 'waveform', 'progress']);
+const WIDGET_LAYOUT_TEXT_KEYS = new Set(['title', 'author', 'requester', 'currentTime', 'duration']);
+const WIDGET_LAYOUT_TEXT_DEFAULTS = {
+    title: { color: '#b7c6d6', align: 'left' },
+    author: { color: '#97a9bb', align: 'left' },
+    requester: { color: '#eef4fb', align: 'center' },
+    currentTime: { color: '#b7c6d6', align: 'center' },
+    duration: { color: '#b7c6d6', align: 'center' }
+};
+const WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR = '#4f6275';
+const DEFAULT_WIDGET_LAYOUT_ORDER = ['cover', 'requester', 'title', 'author', 'currentTime', 'waveform', 'duration', 'progress', 'meterBackground', 'infoBackground'];
+const DEFAULT_WIDGET_LAYOUT_ELEMENTS = {
+    cover: { x: 1.25, y: 3, width: 28.3, height: 68, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    infoBackground: { x: 31.2, y: 3, width: 67.5, height: 68, rotation: 0, opacity: 1, backgroundOpacity: 0.5, visible: true },
+    title: { x: 32.6, y: 23.4, width: 64.8, height: 21, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    author: { x: 32.6, y: 45.5, width: 64.8, height: 5.2, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    requester: { x: 88.9, y: 3, width: 9.8, height: 7.8, rotation: 0, opacity: 1, backgroundOpacity: 0.76, visible: true },
+    meterBackground: { x: 1.25, y: 75, width: 97.5, height: 16.5, rotation: 0, opacity: 1, backgroundOpacity: 0.5, visible: true },
+    currentTime: { x: 2.6, y: 79, width: 11, height: 8.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    waveform: { x: 15.3, y: 78, width: 69.5, height: 10.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    duration: { x: 86.4, y: 79, width: 11, height: 8.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    progress: { x: 1.25, y: 94.7, width: 97.5, height: 2.3, rotation: 0, opacity: 1, backgroundOpacity: 0.22, visible: true }
+};
+const WIDGET_LAYOUT_BACKGROUND_KEYS = new Set(['infoBackground', 'meterBackground']);
+
+function clampWidgetLayoutNumber(value, min, max, fallback) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, parsed));
+}
+
+function getWidgetLayoutMinSize(key) {
+    return key === 'progress' ? 1 : 3;
+}
+
+function getWidgetLayoutMinPosition(size) {
+    return Math.min(0, 3 - Number(size || 0));
+}
+
+function getWidgetLayoutMaxPosition(size) {
+    return Math.max(0, 97);
+}
+
+function isWidgetLayoutOutOfBounds(layout) {
+    if (!layout) return false;
+    return layout.x < 0 || layout.y < 0 || layout.x + layout.width > 100 || layout.y + layout.height > 100;
+}
+
+function isWidgetLayoutObjectColorElement(key) {
+    return WIDGET_LAYOUT_OBJECT_COLOR_KEYS.has(key);
+}
+
+function isWidgetLayoutTextElement(key) {
+    return WIDGET_LAYOUT_TEXT_KEYS.has(key);
+}
+
+function normalizeWidgetHexColor(value, fallback = WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR) {
+    const text = String(value || '').trim();
+    if (/^#[0-9a-f]{6}$/i.test(text)) return text.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(text)) {
+        return ('#' + text.slice(1).split('').map(char => char + char).join('')).toLowerCase();
+    }
+    return fallback;
+}
+
+function widgetHexColorToRgbString(value) {
+    const color = normalizeWidgetHexColor(value);
+    return [
+        parseInt(color.slice(1, 3), 16),
+        parseInt(color.slice(3, 5), 16),
+        parseInt(color.slice(5, 7), 16)
+    ].join(', ');
+}
+
+function normalizeWidgetTextAlign(value, fallback = 'left') {
+    return ['left', 'center', 'right'].includes(value) ? value : fallback;
+}
+
+function getWidgetTextDefault(key) {
+    return WIDGET_LAYOUT_TEXT_DEFAULTS[key] || { color: '#b7c6d6', align: 'center' };
+}
+
+function getWidgetTextJustifyContent(align) {
+    if (align === 'right') return 'flex-end';
+    if (align === 'center') return 'center';
+    return 'flex-start';
+}
+
+function getWidgetTextJustifyItems(align) {
+    if (align === 'right') return 'end';
+    if (align === 'center') return 'center';
+    return 'start';
+}
+
+function normalizeWidgetLayoutOrder(value) {
+    const source = Array.isArray(value) ? value : DEFAULT_WIDGET_LAYOUT_ORDER;
+    const seen = new Set();
+    const order = [];
+    source.forEach(key => {
+        if (!WIDGET_LAYOUT_ELEMENT_KEYS.includes(key) || seen.has(key)) return;
+        seen.add(key);
+        order.push(key);
+    });
+    DEFAULT_WIDGET_LAYOUT_ORDER.forEach(key => {
+        if (!seen.has(key)) order.push(key);
+    });
+    return order;
+}
+
+function getWidgetLayoutOrder(config) {
+    return normalizeWidgetLayoutOrder(config && config.order);
+}
+
+function getWidgetLayoutElementLayer(config, key) {
+    const order = getWidgetLayoutOrder(config);
+    const index = order.indexOf(key);
+    return index >= 0 ? ((order.length - index) * 10) : 10;
+}
+
+function getWidgetLayoutHitTestOrder(config) {
+    return getWidgetLayoutOrder(config);
+}
+
+function createDefaultWidgetLayoutConfig() {
+    const elements = {};
+    WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
+        elements[key] = { ...DEFAULT_WIDGET_LAYOUT_ELEMENTS[key] };
+    });
+    return { version: 2, updatedAt: Date.now(), order: normalizeWidgetLayoutOrder(), elements };
+}
+
+function normalizeWidgetLayoutConfig(value) {
+    if (!value) return null;
+
+    let parsed = value;
+    if (typeof value === 'string') {
+        try {
+            parsed = JSON.parse(value);
+        } catch (error) {
+            return null;
+        }
+    }
+    if (!parsed || typeof parsed !== 'object' || !parsed.elements || typeof parsed.elements !== 'object') return null;
+
+    const normalized = createDefaultWidgetLayoutConfig();
+    normalized.updatedAt = clampWidgetLayoutNumber(parsed.updatedAt, 0, Number.MAX_SAFE_INTEGER, Date.now());
+    normalized.order = normalizeWidgetLayoutOrder(parsed.order);
+
+    WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
+        const fallback = DEFAULT_WIDGET_LAYOUT_ELEMENTS[key];
+        const source = parsed.elements[key] && typeof parsed.elements[key] === 'object' ? parsed.elements[key] : {};
+        const minSize = getWidgetLayoutMinSize(key);
+        const width = clampWidgetLayoutNumber(source.width, minSize, 100, fallback.width);
+        const height = clampWidgetLayoutNumber(source.height, minSize, 100, fallback.height);
+        const textDefault = getWidgetTextDefault(key);
+
+        normalized.elements[key] = {
+            x: clampWidgetLayoutNumber(source.x, getWidgetLayoutMinPosition(width), getWidgetLayoutMaxPosition(width), fallback.x),
+            y: clampWidgetLayoutNumber(source.y, getWidgetLayoutMinPosition(height), getWidgetLayoutMaxPosition(height), fallback.y),
+            width,
+            height,
+            rotation: clampWidgetLayoutNumber(source.rotation, -180, 180, fallback.rotation),
+            opacity: clampWidgetLayoutNumber(source.opacity, 0, 1, fallback.opacity),
+            backgroundOpacity: clampWidgetLayoutNumber(source.backgroundOpacity, 0, 1, fallback.backgroundOpacity),
+            colorMode: source.colorMode === 'custom' ? 'custom' : 'cover',
+            color: normalizeWidgetHexColor(source.color, WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR),
+            textColorMode: source.textColorMode === 'custom' ? 'custom' : 'auto',
+            textColor: normalizeWidgetHexColor(source.textColor, textDefault.color),
+            textAlign: normalizeWidgetTextAlign(source.textAlign, textDefault.align),
+            visible: source.visible !== false
+        };
+    });
+
+    return normalized;
+}
+
+function readWidgetLayoutConfig() {
+    try {
+        return normalizeWidgetLayoutConfig(localStorage.getItem(WIDGET_LAYOUT_STORAGE_KEY));
+    } catch (error) {
+        return null;
+    }
+}
+
+function writeWidgetLayoutConfig(config) {
+    const normalized = normalizeWidgetLayoutConfig(config);
+    try {
+        if (normalized) localStorage.setItem(WIDGET_LAYOUT_STORAGE_KEY, JSON.stringify(normalized));
+        else localStorage.removeItem(WIDGET_LAYOUT_STORAGE_KEY);
+        localStorage.setItem(WIDGET_LAYOUT_REVISION_KEY, String(Date.now()));
+    } catch (error) {}
+    return normalized;
+}
+
+function clearWidgetLayoutElementStyles(element) {
+    if (!element) return;
+    element.classList.remove('is-widget-element-hidden', 'is-widget-element-outside', 'is-widget-custom-color');
+    element.removeAttribute('data-base-font-size');
+    ['left', 'top', 'width', 'height', 'transform', 'opacity', 'z-index', 'font-size', 'color', 'text-align', 'justify-content', 'justify-items', '--widget-element-bg-opacity', '--widget-element-scale', '--widget-element-rgb']
+        .forEach(property => element.style.removeProperty(property));
+}
+
+function fitWidgetOriginalTextElement(element, minScale) {
+    if (!element) return;
+    const currentSize = parseFloat(element.dataset.baseFontSize || getComputedStyle(element).fontSize);
+    if (!element.dataset.baseFontSize) element.dataset.baseFontSize = String(currentSize);
+    const minSize = Math.max(9, currentSize * minScale);
+    let size = currentSize;
+
+    element.style.fontSize = currentSize + 'px';
+    while (size > minSize && (element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1)) {
+        size -= 1;
+        element.style.fontSize = size + 'px';
+    }
+}
+
+function fitWidgetOriginalCardText(card) {
+    if (!card || card.classList.contains('has-custom-layout')) return;
+    fitWidgetOriginalTextElement(card.querySelector('.np-card-title'), 0.72);
+    fitWidgetOriginalTextElement(card.querySelector('.np-card-author'), 0.68);
+}
+
+function measureWidgetLayoutFromCard(card) {
+    if (!card) return createDefaultWidgetLayoutConfig();
+    const cardRect = card.getBoundingClientRect();
+    if (!cardRect.width || !cardRect.height) return createDefaultWidgetLayoutConfig();
+    const measured = createDefaultWidgetLayoutConfig();
+
+    WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
+        let element = card.querySelector('[data-widget-element="' + key + '"]');
+        if (key === 'infoBackground') element = card.querySelector('.np-card-info');
+        if (key === 'meterBackground') element = card.querySelector('.np-card-meter');
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        const fallback = DEFAULT_WIDGET_LAYOUT_ELEMENTS[key];
+        measured.elements[key] = {
+            ...fallback,
+            x: ((rect.left - cardRect.left) / cardRect.width) * 100,
+            y: ((rect.top - cardRect.top) / cardRect.height) * 100,
+            width: (rect.width / cardRect.width) * 100,
+            height: (rect.height / cardRect.height) * 100
+        };
+    });
+
+    return normalizeWidgetLayoutConfig(measured) || measured;
+}
+
+const widgetLayoutTextFitFrames = new WeakMap();
+const widgetLayoutTextFitTimers = new WeakMap();
+
+function fitWidgetLayoutCardText(card) {
+    if (!card || !card.classList.contains('has-custom-layout')) return;
+    const profiles = {
+        title: { height: 0.42, width: 0.085, min: 9, max: 58, wrap: true },
+        author: { height: 0.55, width: 0.07, min: 9, max: 28, wrap: true },
+        requester: { height: 0.52, width: 0.13, min: 9, max: 24, wrap: false },
+        currentTime: { height: 0.62, width: 0.22, min: 9, max: 32, wrap: false },
+        duration: { height: 0.62, width: 0.22, min: 9, max: 32, wrap: false }
+    };
+
+    Object.entries(profiles).forEach(([key, profile]) => {
+        const element = card.querySelector('[data-widget-element="' + key + '"]');
+        if (!element || element.classList.contains('is-widget-element-hidden')) return;
+        element.style.fontSize = '';
+        const width = Math.max(1, element.clientWidth);
+        const height = Math.max(1, element.clientHeight);
+        let size = Math.min(profile.max, Math.max(profile.min, Math.min(height * profile.height, width * profile.width)));
+        element.style.fontSize = size + 'px';
+        while (size > profile.min && (element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1)) {
+            size -= 1;
+            element.style.fontSize = size + 'px';
+        }
+    });
+}
+
+function queueWidgetLayoutCardTextFit(card) {
+    if (!card) return;
+    const previous = widgetLayoutTextFitFrames.get(card);
+    if (previous) cancelAnimationFrame(previous);
+    const frame = requestAnimationFrame(() => {
+        widgetLayoutTextFitFrames.delete(card);
+        fitWidgetLayoutCardText(card);
+    });
+    widgetLayoutTextFitFrames.set(card, frame);
+}
+
+function scheduleWidgetLayoutCardTextFit(card) {
+    if (!card) return;
+    queueWidgetLayoutCardTextFit(card);
+    const previous = widgetLayoutTextFitTimers.get(card);
+    if (previous) clearTimeout(previous);
+    const timer = setTimeout(() => {
+        widgetLayoutTextFitTimers.delete(card);
+        queueWidgetLayoutCardTextFit(card);
+    }, 340);
+    widgetLayoutTextFitTimers.set(card, timer);
+}
+
+function applyWidgetLayoutToCard(card, config, options = {}) {
+    if (!card) return null;
+    const normalized = normalizeWidgetLayoutConfig(config);
+    card.classList.add('widget-layout-card');
+    card.classList.toggle('has-custom-layout', !!normalized);
+    card.classList.toggle('is-layout-editor-card', !!options.editor);
+
+    WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
+        const element = card.querySelector('[data-widget-element="' + key + '"]');
+        if (!element) return;
+        clearWidgetLayoutElementStyles(element);
+        if (!normalized) return;
+
+        const layout = normalized.elements[key];
+        const fallback = DEFAULT_WIDGET_LAYOUT_ELEMENTS[key];
+        const areaScale = Math.sqrt((layout.width * layout.height) / Math.max(1, fallback.width * fallback.height));
+        const elementScale = clampWidgetLayoutNumber(areaScale, 0.45, 3.2, 1);
+
+        element.style.left = layout.x + '%';
+        element.style.top = layout.y + '%';
+        element.style.width = layout.width + '%';
+        element.style.height = layout.height + '%';
+        element.style.transform = 'rotate(' + layout.rotation + 'deg)';
+        element.style.opacity = String(layout.opacity);
+        element.style.zIndex = String(getWidgetLayoutElementLayer(normalized, key));
+        element.style.setProperty('--widget-element-bg-opacity', String(layout.backgroundOpacity));
+        element.style.setProperty('--widget-element-scale', String(elementScale));
+        if (isWidgetLayoutObjectColorElement(key) && layout.colorMode === 'custom') {
+            element.classList.add('is-widget-custom-color');
+            element.style.setProperty('--widget-element-rgb', widgetHexColorToRgbString(layout.color));
+        }
+        if (isWidgetLayoutTextElement(key)) {
+            const align = normalizeWidgetTextAlign(layout.textAlign, getWidgetTextDefault(key).align);
+            element.style.textAlign = align;
+            element.style.justifyContent = getWidgetTextJustifyContent(align);
+            element.style.justifyItems = getWidgetTextJustifyItems(align);
+            if (layout.textColorMode === 'custom') element.style.color = layout.textColor;
+        }
+        element.classList.toggle('is-widget-element-hidden', !layout.visible);
+        element.classList.toggle('is-widget-element-outside', !!options.editor && isWidgetLayoutOutOfBounds(layout));
+    });
+
+    scheduleWidgetLayoutCardTextFit(card);
+    return normalized;
+}
+
 if (document.body.classList.contains('now-playing-widget-page')) {
 const STORAGE_KEY = 'ytm_now_playing_widget_state';
 const CHANNEL_NAME = 'ytm_now_playing_widget';
 const root = document.getElementById('widget-root');
 const widgetParams = new URLSearchParams(window.location.search || '');
+const WIDGET_EDITOR_PREVIEW = isTruthyParam(widgetParams.get('editor') || widgetParams.get('preview'));
+if (WIDGET_EDITOR_PREVIEW) document.body.classList.add('is-widget-editor-preview');
 const WIDGET_WS_HOST = normalizeWebsocketHost(widgetParams.get('server') || widgetParams.get('host') || widgetParams.get('wsHost') || DEFAULT_STREAMERBOT_WS_HOST);
 const WIDGET_WS_PORT = widgetParams.get('port') || widgetParams.get('wsPort') || '8080';
 const WIDGET_WS_PASS = widgetParams.get('pass') || widgetParams.get('password') || widgetParams.get('wsPass') || '';
 const WIDGET_LANG = widgetParams.get('lang') || widgetParams.get('language') || '';
-const WIDGET_AUDIO_ENABLED = isTruthyParam(widgetParams.get('audio') || widgetParams.get('sound') || widgetParams.get('playAudio'));
+const WIDGET_AUDIO_ENABLED = !WIDGET_EDITOR_PREVIEW && isTruthyParam(widgetParams.get('audio') || widgetParams.get('sound') || widgetParams.get('playAudio'));
 const WIDGET_STALE_MS = 3500;
 const WIDGET_CONNECTION_MESSAGE_DELAY_MS = 15000;
 const WIDGET_AUTO_HIDE_MS = 30000;
@@ -69,6 +428,7 @@ let widgetAudioLastSeekAt = 0;
 let widgetAudioApiLoading = false;
 let widgetAudioHasLock = !WIDGET_AUDIO_ENABLED;
 let widgetAudioLockInterval = null;
+let activeWidgetLayoutConfig = readWidgetLayoutConfig();
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -475,6 +835,15 @@ function shouldKeepWidgetSilent(mode) {
 }
 
 function showWidgetTemporarily(mode) {
+    if (WIDGET_EDITOR_PREVIEW) {
+        clearWidgetAutoHide();
+        root.classList.add('is-widget-visible');
+        root.classList.remove('is-widget-hidden');
+        widgetHiddenReason = '';
+        widgetAutoHideMode = '';
+        return true;
+    }
+
     if (shouldKeepWidgetSilent(mode)) return false;
 
     root.classList.add('is-widget-visible');
@@ -526,6 +895,23 @@ function getWidgetSongKey(state) {
     ].join('|');
 }
 
+function syncWidgetLayoutConfigFromState(state) {
+    if (!state || !Object.prototype.hasOwnProperty.call(state, 'widgetLayout')) return false;
+    const nextConfig = normalizeWidgetLayoutConfig(state.widgetLayout);
+    const currentPayload = activeWidgetLayoutConfig ? JSON.stringify(activeWidgetLayoutConfig) : '';
+    const nextPayload = nextConfig ? JSON.stringify(nextConfig) : '';
+    if (currentPayload === nextPayload) return false;
+
+    activeWidgetLayoutConfig = WIDGET_EDITOR_PREVIEW ? nextConfig : writeWidgetLayoutConfig(nextConfig);
+    const card = document.getElementById('widget-now-playing-card');
+    if (card) {
+        applyWidgetLayoutToCard(card, activeWidgetLayoutConfig, { editor: WIDGET_EDITOR_PREVIEW });
+        syncNowPlayingWaveBars(document.getElementById('widget-now-playing-wave'));
+        queueWidgetTextFit();
+    }
+    return true;
+}
+
 function updateWidgetCardState(state, progress) {
     const card = document.getElementById('widget-now-playing-card');
     const currentEl = document.getElementById('widget-now-playing-current');
@@ -563,28 +949,18 @@ function updateWidgetCardState(state, progress) {
     queueWidgetTextFit();
 }
 
-function fitWidgetTextElement(element, minScale) {
-    if (!element) return;
-    const currentSize = parseFloat(element.dataset.baseFontSize || getComputedStyle(element).fontSize);
-    if (!element.dataset.baseFontSize) element.dataset.baseFontSize = String(currentSize);
-    const minSize = Math.max(9, currentSize * minScale);
-    let size = currentSize;
-
-    element.style.fontSize = currentSize + 'px';
-    while (size > minSize && (element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1)) {
-        size -= 1;
-        element.style.fontSize = size + 'px';
-    }
-}
-
 let widgetTextFitFrame = 0;
 let widgetResizeObserver = null;
 
 function queueWidgetTextFit() {
     cancelAnimationFrame(widgetTextFitFrame);
     widgetTextFitFrame = requestAnimationFrame(() => {
-        fitWidgetTextElement(document.querySelector('#widget-now-playing-card .np-card-title'), 0.72);
-        fitWidgetTextElement(document.querySelector('#widget-now-playing-card .np-card-author'), 0.68);
+        const card = document.getElementById('widget-now-playing-card');
+        if (card && card.classList.contains('has-custom-layout')) {
+            queueWidgetLayoutCardTextFit(card);
+            return;
+        }
+        fitWidgetOriginalCardText(card);
     });
 }
 
@@ -601,6 +977,7 @@ function observeWidgetCard() {
 
 function renderState(state) {
     syncWidgetAudio(state);
+    syncWidgetLayoutConfigFromState(state);
 
     if (!state || !state.hasSong || state.isStopped) {
         if (state && state.isStopped && lastWidgetPlayableState && document.getElementById('widget-now-playing-card')) {
@@ -652,22 +1029,25 @@ function renderState(state) {
     activeWidgetSongKey = songKey;
     root.innerHTML =
         '<div id="widget-now-playing-card" class="now-playing-card panel-card' + playingClass + waveEndingClass + skipClass + fadeClass + holdClass + '">' +
-            '<img class="np-card-cover" src="' + thumbnail + '" alt="">' +
+            '<img class="np-card-cover" data-widget-element="cover" src="' + thumbnail + '" alt="">' +
+            '<div class="np-card-info-bg" data-widget-element="infoBackground" aria-hidden="true"></div>' +
+            '<div class="np-card-meter-bg" data-widget-element="meterBackground" aria-hidden="true"></div>' +
             '<div class="np-card-main">' +
                 '<div class="np-card-info">' +
-                    '<div class="np-card-title" title="' + title + '">' + title + '</div>' +
-                    '<div class="np-card-author" title="' + author + '">' + author + '</div>' +
+                    '<div class="np-card-title" data-widget-element="title" title="' + title + '">' + title + '</div>' +
+                    '<div class="np-card-author" data-widget-element="author" title="' + author + '">' + author + '</div>' +
                 '</div>' +
                 '<div class="np-card-meter">' +
-                    '<span id="widget-now-playing-current" class="np-card-time">' + formatTime(state.currentTime) + '</span>' +
-                    '<div id="widget-now-playing-wave" class="np-card-wave" style="--np-progress: ' + progress + '%" aria-hidden="true">' + createNowPlayingWaveBars() + '</div>' +
-                    '<span id="widget-now-playing-duration" class="np-card-time">' + formatTime(state.duration) + '</span>' +
+                    '<span id="widget-now-playing-current" class="np-card-time" data-widget-element="currentTime">' + formatTime(state.currentTime) + '</span>' +
+                    '<div id="widget-now-playing-wave" class="np-card-wave" data-widget-element="waveform" style="--np-progress: ' + progress + '%" aria-hidden="true">' + createNowPlayingWaveBars() + '</div>' +
+                    '<span id="widget-now-playing-duration" class="np-card-time" data-widget-element="duration">' + formatTime(state.duration) + '</span>' +
                 '</div>' +
             '</div>' +
-            '<span class="np-card-user">' + user + '</span>' +
-            '<div class="np-card-progress"><div id="widget-now-playing-progress" class="np-card-progress-fill" style="width: ' + progress + '%"></div></div>' +
+            '<span class="np-card-user" data-widget-element="requester">' + user + '</span>' +
+            '<div class="np-card-progress" data-widget-element="progress"><div id="widget-now-playing-progress" class="np-card-progress-fill" style="width: ' + progress + '%"></div></div>' +
         '</div>';
 
+    applyWidgetLayoutToCard(document.getElementById('widget-now-playing-card'), activeWidgetLayoutConfig, { editor: WIDGET_EDITOR_PREVIEW });
     updateWidgetCardState(state, progress);
     observeWidgetCard();
     applyCoverThemeToNowPlayingCard(document.getElementById('widget-now-playing-card'), thumbnailUrl);
@@ -707,6 +1087,7 @@ function consumePayload(payload, source = 'unknown') {
 
 function handleWidgetState(state, source = 'message') {
     if (!state || state.type !== 'NOW_PLAYING_STATE') return;
+    if (WIDGET_EDITOR_PREVIEW && source !== 'editor') return;
     consumePayload(JSON.stringify(state), source);
 }
 
@@ -825,6 +1206,25 @@ try {
 window.addEventListener('storage', event => {
     if (event.key === STORAGE_KEY) consumePayload(event.newValue, 'storage-event');
     if (event.key === WIDGET_AUDIO_LOCK_KEY) handleWidgetAudioLockChange();
+    if (event.key === WIDGET_LAYOUT_STORAGE_KEY) {
+        activeWidgetLayoutConfig = normalizeWidgetLayoutConfig(event.newValue);
+        const card = document.getElementById('widget-now-playing-card');
+        if (card) {
+            applyWidgetLayoutToCard(card, activeWidgetLayoutConfig, { editor: WIDGET_EDITOR_PREVIEW });
+            syncNowPlayingWaveBars(document.getElementById('widget-now-playing-wave'));
+            queueWidgetTextFit();
+        }
+    }
+});
+
+window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'WIDGET_EDITOR_STATE' && data.state) {
+        handleWidgetState(data.state, 'editor');
+    } else if (data.type === 'NOW_PLAYING_STATE') {
+        handleWidgetState(data, 'message');
+    }
 });
 
 function monitorWidgetConnection() {
@@ -835,18 +1235,20 @@ function monitorWidgetConnection() {
 }
 
 renderWidgetStatus('ui_widget_waiting_player', 'connection');
-readStorageState();
-connectWidgetWebsocket();
-setInterval(readStorageState, 500);
-setInterval(monitorWidgetConnection, 1000);
+if (!WIDGET_EDITOR_PREVIEW) {
+    readStorageState();
+    connectWidgetWebsocket();
+    setInterval(readStorageState, 500);
+    setInterval(monitorWidgetConnection, 1000);
+}
 } else {
         // =========================================================================
         // PROJECT VERSION AND GITHUB DATA
         // =========================================================================
         const PROJECT_NAME = "Better Song Request";
-        const CURRENT_VERSION = "v1.2.4";
+        const CURRENT_VERSION = "v1.3.0";
         const GITHUB_REPO = "xHackMe/ytm-song-request-streamerbot";
-        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.3";
+        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.4";
         const STREAMERBOT_DIAGNOSTICS_ACTION = "YtmImportDiagnostics";
         const SETTINGS_BACKUP_TYPE = "BETTER_SONG_REQUEST_SETTINGS_BACKUP";
         const LEGACY_SETTINGS_BACKUP_TYPES = ["YTM_SONG_REQUEST_SETTINGS_BACKUP"];
@@ -855,7 +1257,9 @@ setInterval(monitorWidgetConnection, 1000);
             { key: 'CHAT_MESSAGE', label: 'ChatMessage' },
             { key: 'SONG_REQUEST_SETTINGS', label: 'SongRequestSettings' },
             { key: 'NOW_PLAYING_WIDGET_STATE', label: 'NowPlayingWidgetState' },
-            { key: 'VOTE_SKIP', label: 'SongVoteSkip / !voteskip' }
+            { key: 'VOTE_SKIP', label: 'SongVoteSkip / !voteskip' },
+            { key: 'WHEN_SONG', label: 'SongWhen / !when' },
+            { key: 'QUEUE_SONGS', label: 'SongQueue / !queue' }
         ];
         const REQUIRED_IMPORT_COMPONENTS = {
             actions: [
@@ -872,12 +1276,16 @@ setInterval(monitorWidgetConnection, 1000);
                 { id: '7b511689-cf6f-499e-a06e-980978bb4376', name: 'SongRequestSettings' },
                 { id: '481f0f0a-dfae-4152-ad60-90ad1750b981', name: 'NowPlayingWidgetState' },
                 { id: 'f878f3d8-096f-4e9a-b9f0-024c1458e8c1', name: 'SongVoteSkip' },
+                { id: '60a417db-fd5d-4a39-82c1-9b8f8608f102', name: 'SongWhen' },
+                { id: 'd5232b31-c096-4b71-a9b1-6b4a03aca0a7', name: 'SongQueue' },
                 { name: 'YtmImportDiagnostics' }
             ],
             commands: [
                 { id: '16422aad-ca07-43c6-b527-dc8f0a2f7c13', name: '!sr', aliases: ['!sr'], action: 'SongRequest' },
                 { id: 'a306e7a2-e751-4f2d-8da9-1cb7190c937a', name: '!srForce', aliases: ['!srForce', '!srforce'], action: 'SongRequestForce' },
                 { id: 'cfe7edd2-1ac5-49bf-bc06-1f7f96848937', name: '!song', aliases: ['!song', '!songname'], action: 'SongName' },
+                { id: 'e9be62d5-3d98-4c5a-bc61-889b450e976a', name: '!when', aliases: ['!when'], action: 'SongWhen' },
+                { id: 'dc2d8d53-b8ff-4dd5-b387-26e18d2ecf92', name: '!queue', aliases: ['!queue'], action: 'SongQueue' },
                 { id: 'f0c06e4b-adf2-4224-9187-7d67a8a83451', name: '!skip', aliases: ['!skip', '!skipsong'], action: 'SongSkip' },
                 { id: '5c6af3b5-f713-48ed-83bf-23c948ef9c37', name: '!voteskip', aliases: ['!voteskip', '!skipvote'], action: 'SongVoteSkip' },
                 { id: 'c20bddc3-36d8-4a9f-b0e1-a507233b0c40', name: '!wrongsong', aliases: ['!wrongsong', '!songwrong'], action: 'SongWrong' },
@@ -1112,6 +1520,13 @@ setInterval(monitorWidgetConnection, 1000);
 
             updateWidgetUrlDisplay();
 
+            const widgetCustomizerModal = document.getElementById('widget-customizer-modal');
+            if (widgetCustomizerModal && widgetCustomizerModal.style.display === 'flex') {
+                renderWidgetCustomizerPreview();
+                renderWidgetCustomizerElementList();
+                renderWidgetCustomizerControls();
+            }
+
             if(ws) {
                 ws.onclose = null; 
                 ws.close();
@@ -1160,6 +1575,10 @@ setInterval(monitorWidgetConnection, 1000);
             renderWebsocketStatus();
             renderImportStatusBanner();
             renderDiagnosticsResults();
+            if (document.getElementById('widget-customizer-modal')?.style.display === 'flex') {
+                renderWidgetCustomizerElementList();
+                renderWidgetCustomizerControls();
+            }
         }
 
         // =========================================================================
@@ -1212,10 +1631,47 @@ setInterval(monitorWidgetConnection, 1000);
         let lastNowPlayingStreamerBotPush = 0;
         let nowPlayingWidgetStartupBurstTimeouts = [];
         let WIDGET_AUDIO_ENABLED_CONFIG = localStorage.getItem('ytm_widget_audio_enabled') === 'true';
+        let WIDGET_LAYOUT_CONFIG = readWidgetLayoutConfig();
+        let WIDGET_LAYOUT_REVISION = Number(localStorage.getItem(WIDGET_LAYOUT_REVISION_KEY)) || 0;
         let widgetUrlBaseline = '';
         let widgetUrlWarningEnabled = false;
         let widgetTestState = null;
         let widgetTestStateUntil = 0;
+        const WIDGET_CUSTOMIZER_DEMO_SONG = {
+            id: 'dQw4w9WgXcQ',
+            title: 'Rick Astley - Never Gonna Give You Up',
+            author: 'Rick Astley',
+            duration: 213,
+            user: 'Source'
+        };
+        const WIDGET_LAYOUT_ELEMENT_LABEL_KEYS = {
+            cover: 'ui_widget_element_cover',
+            infoBackground: 'ui_widget_element_info_background',
+            title: 'ui_widget_element_title',
+            author: 'ui_widget_element_author',
+            requester: 'ui_widget_element_requester',
+            meterBackground: 'ui_widget_element_meter_background',
+            currentTime: 'ui_widget_element_current_time',
+            waveform: 'ui_widget_element_waveform',
+            duration: 'ui_widget_element_duration',
+            progress: 'ui_widget_element_progress'
+        };
+        let widgetLayoutDraft = null;
+        let widgetCustomizerSelectedKey = 'title';
+        let widgetCustomizerSelectionActive = true;
+        let widgetCustomizerInteraction = null;
+        let widgetCustomizerEventsBound = false;
+        let widgetCustomizerResizeObserver = null;
+        let widgetCustomizerPreviewHeartbeat = null;
+        let widgetCustomizerDemoActive = false;
+        let widgetLayoutHistory = [];
+        let widgetLayoutPresets = loadWidgetLayoutPresets();
+        let widgetCustomizerSnapEnabled = localStorage.getItem(WIDGET_EDITOR_SNAP_STORAGE_KEY) !== 'false';
+        let widgetCustomizerPreviewMode = localStorage.getItem(WIDGET_EDITOR_PREVIEW_MODE_STORAGE_KEY) || 'default';
+        let widgetCustomizerPreviewSize = loadWidgetCustomizerPreviewSize(widgetCustomizerPreviewMode);
+        let widgetCustomizerUsesOriginalLayout = false;
+        let widgetCustomizerDraftDirty = false;
+        let widgetLayerDragSourceIndex = null;
         let importStatusState = 'unknown';
         let importStatusMissingItems = [];
         let importStatusVersion = '';
@@ -1263,7 +1719,9 @@ setInterval(monitorWidgetConnection, 1000);
                 clearAllBans, closeBanList, closePlaylistManager, addBasePlaylist,
                 closeTutorial, copySbCode, copyWidgetUrl, clearQueueWithConfirm,
                 runDiagnostics, checkImportStatus, exportSettings, chooseSettingsImport,
-                sendWidgetTest, openViewerHistory, closeViewerHistory, clearViewerHistoryWithConfirm
+                sendWidgetTest, openViewerHistory, closeViewerHistory, clearViewerHistoryWithConfirm,
+                openWidgetCustomizer, closeWidgetCustomizer, saveWidgetLayout, resetWidgetLayoutWithConfirm,
+                undoWidgetLayout
             };
 
             const changeHandlers = { toggleSR, handleQueuePersistenceToggle, saveSongRequestSettings, handleWidgetAudioToggle, importSettingsFile, renderViewerHistory };
@@ -1294,6 +1752,7 @@ setInterval(monitorWidgetConnection, 1000);
         }
 
         bindStaticUiEvents();
+        bindWidgetCustomizerEvents();
         const wsHostInput = document.getElementById('ws-host-input');
         const wsPortInput = document.getElementById('ws-port-input');
         const wsPassInput = document.getElementById('ws-pass-input');
@@ -1350,6 +1809,1259 @@ setInterval(monitorWidgetConnection, 1000);
             document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
             document.getElementById(`tab-btn-${tabName}`).classList.add('active');
             document.getElementById(`tab-content-${tabName}`).classList.add('active');
+        }
+
+        function cloneWidgetLayoutForEditor(config) {
+            const source = normalizeWidgetLayoutConfig(config);
+            return source ? normalizeWidgetLayoutConfig(JSON.parse(JSON.stringify(source))) : null;
+        }
+
+        function getWidgetLayoutElementLabel(key) {
+            return t(WIDGET_LAYOUT_ELEMENT_LABEL_KEYS[key] || key);
+        }
+
+        function cloneWidgetLayoutSnapshot(config = widgetLayoutDraft) {
+            return {
+                layout: config ? normalizeWidgetLayoutConfig(JSON.parse(JSON.stringify(config))) : null,
+                usesOriginalLayout: widgetCustomizerUsesOriginalLayout,
+                isDirty: widgetCustomizerDraftDirty
+            };
+        }
+
+        function updateWidgetUndoButton() {
+            const button = document.getElementById('widget-customizer-undo');
+            if (button) button.disabled = widgetLayoutHistory.length === 0;
+        }
+
+        function pushWidgetLayoutHistory() {
+            if (!widgetLayoutDraft) return;
+            const snapshot = cloneWidgetLayoutSnapshot();
+            const payload = JSON.stringify(snapshot);
+            if (widgetLayoutHistory.length && JSON.stringify(widgetLayoutHistory[widgetLayoutHistory.length - 1]) === payload) return;
+            widgetLayoutHistory.push(snapshot);
+            if (widgetLayoutHistory.length > 60) widgetLayoutHistory.shift();
+            updateWidgetUndoButton();
+        }
+
+        function undoWidgetLayout() {
+            if (!widgetLayoutHistory.length) return;
+            const snapshot = widgetLayoutHistory.pop();
+            widgetLayoutDraft = snapshot.layout;
+            widgetCustomizerUsesOriginalLayout = snapshot.usesOriginalLayout;
+            widgetCustomizerDraftDirty = snapshot.isDirty;
+            renderWidgetCustomizerPreview();
+            renderWidgetCustomizerElementList();
+            renderWidgetCustomizerControls();
+            updateWidgetUndoButton();
+        }
+
+        function markWidgetCustomizerLayoutChanged() {
+            widgetCustomizerUsesOriginalLayout = false;
+            widgetCustomizerDraftDirty = true;
+        }
+
+        function normalizeWidgetLayoutPreset(preset) {
+            if (!preset || typeof preset !== 'object') return null;
+            const layout = normalizeWidgetLayoutConfig(preset.layout);
+            if (!layout) return null;
+            const id = String(preset.id || '').trim() || ('preset-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7));
+            const name = String(preset.name || '').trim().slice(0, 60) || 'Preset';
+            return {
+                id,
+                name,
+                favorite: preset.favorite === true,
+                createdAt: Number(preset.createdAt) || Date.now(),
+                updatedAt: Number(preset.updatedAt) || Date.now(),
+                layout
+            };
+        }
+
+        function loadWidgetLayoutPresets() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(WIDGET_LAYOUT_PRESETS_STORAGE_KEY) || '[]');
+                if (!Array.isArray(parsed)) return [];
+                return parsed.map(normalizeWidgetLayoutPreset).filter(Boolean).slice(0, 80);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveWidgetLayoutPresets() {
+            try {
+                if (widgetLayoutPresets.length) localStorage.setItem(WIDGET_LAYOUT_PRESETS_STORAGE_KEY, JSON.stringify(widgetLayoutPresets));
+                else localStorage.removeItem(WIDGET_LAYOUT_PRESETS_STORAGE_KEY);
+            } catch (error) {}
+        }
+
+        function getNextWidgetPresetName() {
+            let index = 1;
+            const names = new Set(widgetLayoutPresets.map(preset => String(preset.name || '').trim().toLowerCase()));
+            while (names.has(('preset ' + index).toLowerCase())) index += 1;
+            return 'Preset ' + index;
+        }
+
+        function refreshWidgetPresetNameInput() {
+            const input = document.getElementById('widget-preset-name-input');
+            if (input && !input.value.trim()) input.value = getNextWidgetPresetName();
+        }
+
+        function renderWidgetLayoutPresets() {
+            const list = document.getElementById('widget-preset-list');
+            if (!list) return;
+            refreshWidgetPresetNameInput();
+            if (!widgetLayoutPresets.length) {
+                list.innerHTML = '<div class="widget-preset-empty">' + escapeHtml(t('ui_widget_presets_empty')) + '</div>';
+                return;
+            }
+            const sorted = widgetLayoutPresets
+                .map((preset, index) => ({ preset, index }))
+                .sort((a, b) => Number(b.preset.favorite) - Number(a.preset.favorite) || a.index - b.index);
+            list.innerHTML = sorted.map(({ preset }) => {
+                const name = escapeHtml(preset.name);
+                const favoriteLabel = escapeHtml(t(preset.favorite ? 'ui_widget_preset_unfavorite' : 'ui_widget_preset_favorite'));
+                const deleteLabel = escapeHtml(t('ui_widget_preset_delete'));
+                return '<div class="widget-preset-item" data-widget-preset-id="' + escapeHtml(preset.id) + '">' +
+                    '<button type="button" class="widget-preset-load" data-widget-preset-load="' + escapeHtml(preset.id) + '" title="' + name + '">' + name + '</button>' +
+                    '<button type="button" class="btn-favorite widget-preset-favorite' + (preset.favorite ? ' is-active' : '') + '" data-widget-preset-favorite="' + escapeHtml(preset.id) + '" title="' + favoriteLabel + '" aria-label="' + favoriteLabel + '">&#9733;</button>' +
+                    '<button type="button" class="widget-preset-delete" data-widget-preset-delete="' + escapeHtml(preset.id) + '" title="' + deleteLabel + '" aria-label="' + deleteLabel + '"><span class="widget-preset-delete-icon" aria-hidden="true"></span></button>' +
+                '</div>';
+            }).join('');
+        }
+
+        function addWidgetLayoutPreset() {
+            if (!widgetLayoutDraft) {
+                const card = getWidgetCustomizerPreviewCard();
+                if (card) widgetLayoutDraft = measureWidgetLayoutFromCard(card);
+                else measureWidgetCustomizerOriginalLayout();
+            }
+            const layout = normalizeWidgetLayoutConfig(widgetLayoutDraft);
+            if (!layout) return;
+            const input = document.getElementById('widget-preset-name-input');
+            const name = String(input && input.value ? input.value : '').trim() || getNextWidgetPresetName();
+            const preset = normalizeWidgetLayoutPreset({
+                id: 'preset-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
+                name,
+                favorite: false,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                layout
+            });
+            if (!preset) return;
+            widgetLayoutPresets.push(preset);
+            saveWidgetLayoutPresets();
+            if (input) input.value = getNextWidgetPresetName();
+            renderWidgetLayoutPresets();
+            showToast(t('ui_widget_preset_saved', { name: preset.name }), 'ok');
+        }
+
+        function loadWidgetLayoutPreset(id) {
+            const preset = widgetLayoutPresets.find(item => item.id === id);
+            if (!preset) return;
+            pushWidgetLayoutHistory();
+            widgetLayoutDraft = cloneWidgetLayoutForEditor(preset.layout);
+            widgetCustomizerUsesOriginalLayout = false;
+            widgetCustomizerDraftDirty = true;
+            applyWidgetLayoutDraftToPreview({ elements: true });
+            showToast(t('ui_widget_preset_loaded', { name: preset.name }), 'ok');
+        }
+
+        function toggleWidgetLayoutPresetFavorite(id) {
+            const preset = widgetLayoutPresets.find(item => item.id === id);
+            if (!preset) return;
+            preset.favorite = !preset.favorite;
+            preset.updatedAt = Date.now();
+            saveWidgetLayoutPresets();
+            renderWidgetLayoutPresets();
+        }
+
+        function deleteWidgetLayoutPreset(id) {
+            const preset = widgetLayoutPresets.find(item => item.id === id);
+            if (!preset) return;
+            showConfirm(t('ui_widget_preset_delete_confirm', { name: preset.name }), () => {
+                widgetLayoutPresets = widgetLayoutPresets.filter(item => item.id !== id);
+                saveWidgetLayoutPresets();
+                renderWidgetLayoutPresets();
+                showToast(t('ui_widget_preset_deleted', { name: preset.name }), 'ok');
+            }, { okText: t('ui_widget_preset_delete') });
+        }
+
+        function clampWidgetPreviewDimension(value, fallback) {
+            return Math.round(clampWidgetLayoutNumber(value, 160, 3840, fallback));
+        }
+
+        function getWidgetCustomizerPreviewPreset(mode) {
+            return WIDGET_EDITOR_PREVIEW_PRESETS[mode] || WIDGET_EDITOR_PREVIEW_PRESETS.default;
+        }
+
+        function loadWidgetCustomizerPreviewSize(mode = 'default') {
+            const preset = getWidgetCustomizerPreviewPreset(mode);
+            if (mode !== 'custom') return { ...preset };
+            return {
+                width: clampWidgetPreviewDimension(localStorage.getItem(WIDGET_EDITOR_PREVIEW_WIDTH_STORAGE_KEY), preset.width),
+                height: clampWidgetPreviewDimension(localStorage.getItem(WIDGET_EDITOR_PREVIEW_HEIGHT_STORAGE_KEY), preset.height)
+            };
+        }
+
+        function updateWidgetCustomizerPreviewInputs() {
+            const widthInput = document.getElementById('widget-preview-width');
+            const heightInput = document.getElementById('widget-preview-height');
+            if (widthInput) widthInput.value = String(widgetCustomizerPreviewSize.width);
+            if (heightInput) heightInput.value = String(widgetCustomizerPreviewSize.height);
+            document.querySelectorAll('[data-widget-preview-ratio]').forEach(button => {
+                button.classList.toggle('active', button.dataset.widgetPreviewRatio === widgetCustomizerPreviewMode);
+            });
+        }
+
+        function applyWidgetCustomizerPreviewSize(options = {}) {
+            const stage = document.getElementById('widget-customizer-stage');
+            if (!stage) return;
+            const fallback = getWidgetCustomizerPreviewPreset(widgetCustomizerPreviewMode);
+            const width = clampWidgetPreviewDimension(widgetCustomizerPreviewSize.width, fallback.width);
+            const height = clampWidgetPreviewDimension(widgetCustomizerPreviewSize.height, fallback.height);
+            widgetCustomizerPreviewSize = { width, height };
+            stage.style.setProperty('--widget-preview-width', String(width));
+            stage.style.setProperty('--widget-preview-height', String(height));
+            stage.style.setProperty('--widget-preview-width-px', width + 'px');
+            stage.style.setProperty('--widget-preview-aspect', String(width / Math.max(1, height)));
+            stage.classList.remove('ratio-default', 'ratio-wide', 'ratio-square', 'ratio-portrait');
+            stage.classList.add('ratio-' + (widgetCustomizerPreviewMode === 'custom' ? 'wide' : widgetCustomizerPreviewMode));
+
+            if (options.save !== false) {
+                localStorage.setItem(WIDGET_EDITOR_PREVIEW_MODE_STORAGE_KEY, widgetCustomizerPreviewMode);
+                localStorage.setItem(WIDGET_EDITOR_PREVIEW_WIDTH_STORAGE_KEY, String(width));
+                localStorage.setItem(WIDGET_EDITOR_PREVIEW_HEIGHT_STORAGE_KEY, String(height));
+            }
+
+            updateWidgetCustomizerPreviewInputs();
+            if (widgetLayoutDraft) renderWidgetCustomizerControls();
+
+            if (options.sync === false) return;
+            setTimeout(() => {
+                postWidgetCustomizerPreviewState({ retry: true });
+                if (widgetCustomizerUsesOriginalLayout) measureWidgetCustomizerOriginalLayout();
+                else updateWidgetCustomizerSelectionOverlay();
+            }, 120);
+        }
+
+        function buildWidgetCustomizerFrameUrl() {
+            const url = new URL('now-playing-widget.html', window.location.href);
+            url.searchParams.set('editor', '1');
+            url.searchParams.set('lang', currentLang || 'en');
+            url.searchParams.set('v', '20260606-125R35');
+            return url.toString();
+        }
+
+        function getWidgetCustomizerPreviewFrame() {
+            return document.getElementById('widget-customizer-frame');
+        }
+
+        function getWidgetCustomizerPreviewCard() {
+            const frame = getWidgetCustomizerPreviewFrame();
+            try {
+                return frame && frame.contentDocument ? frame.contentDocument.getElementById('widget-now-playing-card') : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function getWidgetCustomizerDemoState() {
+            return {
+                type: 'NOW_PLAYING_STATE',
+                hasSong: true,
+                id: WIDGET_CUSTOMIZER_DEMO_SONG.id,
+                title: WIDGET_CUSTOMIZER_DEMO_SONG.title,
+                author: WIDGET_CUSTOMIZER_DEMO_SONG.author,
+                user: t('ui_widget_demo_requester'),
+                thumbnail: 'https://i.ytimg.com/vi/' + WIDGET_CUSTOMIZER_DEMO_SONG.id + '/mqdefault.jpg',
+                currentTime: 78,
+                duration: WIDGET_CUSTOMIZER_DEMO_SONG.duration,
+                progress: (78 / WIDGET_CUSTOMIZER_DEMO_SONG.duration) * 100,
+                isPlaying: true,
+                waveEnding: false,
+                waveEffect: '',
+                waveHold: false,
+                isStopped: false,
+                playerState: 1,
+                updatedAt: Date.now(),
+                widgetLayout: widgetCustomizerUsesOriginalLayout ? null : widgetLayoutDraft
+            };
+        }
+
+        function postWidgetCustomizerPreviewState(options = {}) {
+            const frame = getWidgetCustomizerPreviewFrame();
+            if (!frame || !frame.contentWindow) return false;
+            const state = getWidgetCustomizerDemoState();
+            const deliver = () => {
+                try {
+                    const targetOrigin = window.location.protocol === 'file:' ? '*' : (window.location.origin || '*');
+                    frame.contentWindow.postMessage({ type: 'WIDGET_EDITOR_STATE', state }, targetOrigin);
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            };
+            const delivered = deliver();
+            if (options.retry) {
+                setTimeout(deliver, 60);
+                setTimeout(deliver, 180);
+            }
+            return delivered;
+        }
+
+        function stopWidgetCustomizerPreviewHeartbeat() {
+            clearInterval(widgetCustomizerPreviewHeartbeat);
+            widgetCustomizerPreviewHeartbeat = null;
+        }
+
+        function startWidgetCustomizerDemoMode() {
+            widgetCustomizerDemoActive = true;
+            publishNowPlayingWidgetState(getWidgetCustomizerDemoState(), true);
+        }
+
+        function stopWidgetCustomizerDemoMode() {
+            if (!widgetCustomizerDemoActive) return;
+            widgetCustomizerDemoActive = false;
+            publishNowPlayingWidgetState(getNowPlayingWidgetState({ ignoreWidgetTestState: true }), true);
+        }
+
+        function startWidgetCustomizerPreviewHeartbeat() {
+            stopWidgetCustomizerPreviewHeartbeat();
+            postWidgetCustomizerPreviewState({ retry: true });
+            widgetCustomizerPreviewHeartbeat = setInterval(() => {
+                const modal = document.getElementById('widget-customizer-modal');
+                if (!modal || modal.style.display !== 'flex') {
+                    stopWidgetCustomizerPreviewHeartbeat();
+                    return;
+                }
+                postWidgetCustomizerPreviewState();
+                publishNowPlayingWidgetState(getActiveWidgetPublishState());
+            }, 900);
+        }
+
+        function measureWidgetCustomizerOriginalLayout(options = {}) {
+            if (!widgetCustomizerUsesOriginalLayout) return;
+            const attempt = Number(options.attempt) || 0;
+            const card = getWidgetCustomizerPreviewCard();
+            if (!card || !card.getBoundingClientRect().width) {
+                if (attempt < 12) {
+                    setTimeout(() => measureWidgetCustomizerOriginalLayout({ attempt: attempt + 1 }), 80);
+                }
+                return;
+            }
+            widgetLayoutDraft = measureWidgetLayoutFromCard(card);
+            renderWidgetCustomizerElementList();
+            renderWidgetCustomizerControls();
+            updateWidgetCustomizerSelectionOverlay();
+        }
+
+        function renderWidgetCustomizerPreview() {
+            const preview = document.getElementById('widget-customizer-preview');
+            if (!preview) return;
+            preview.innerHTML = '<iframe id="widget-customizer-frame" class="widget-customizer-frame" title="OBS widget preview" src="' + escapeHtml(buildWidgetCustomizerFrameUrl()) + '"></iframe>';
+
+            const frame = getWidgetCustomizerPreviewFrame();
+            if (frame) {
+                frame.addEventListener('load', () => {
+                    postWidgetCustomizerPreviewState({ retry: true });
+                    if (widgetCustomizerUsesOriginalLayout) measureWidgetCustomizerOriginalLayout();
+                    else updateWidgetCustomizerSelectionOverlay();
+                }, { once: true });
+            }
+
+            requestAnimationFrame(() => {
+                postWidgetCustomizerPreviewState({ retry: true });
+                startWidgetCustomizerPreviewHeartbeat();
+                updateWidgetCustomizerSelectionOverlay();
+            });
+        }
+
+        function renderWidgetCustomizerElementList() {
+            const container = document.getElementById('widget-customizer-elements');
+            if (!container) return;
+            if (!widgetLayoutDraft) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = getWidgetLayoutOrder(widgetLayoutDraft).map((key, index) => {
+                const layout = widgetLayoutDraft.elements[key];
+                if (!layout) return '';
+                const classes = [
+                    'widget-element-button',
+                    widgetCustomizerSelectionActive && key === widgetCustomizerSelectedKey ? 'is-selected' : '',
+                    layout.visible ? '' : 'is-hidden-element'
+                ].filter(Boolean).join(' ');
+                const visibility = layout.visible ? '&#9673;' : '&#9675;';
+                return '<div class="' + classes + '" draggable="true" data-widget-element-key="' + key + '" data-widget-layer-index="' + index + '">' +
+                    '<span class="widget-layer-handle" aria-hidden="true">&#9776;</span>' +
+                    '<span class="widget-element-label">' + escapeHtml(getWidgetLayoutElementLabel(key)) + '</span>' +
+                    '<span class="widget-element-visibility" aria-hidden="true">' + visibility + '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        function formatWidgetControlValue(property, value) {
+            if (property === 'rotation') return Math.round((normalizeWidgetRotation(value) + 360) % 360) + '\u00b0';
+            if (property === 'opacity' || property === 'backgroundOpacity') return Math.round(value * 100) + '%';
+            return Math.round(value * 10) / 10 + '%';
+        }
+
+        function formatWidgetRotationInputValue(value) {
+            return String(Math.round((normalizeWidgetRotation(value) + 360) % 360));
+        }
+
+        function getWidgetCustomizerPreviewDimensions() {
+            const fallback = WIDGET_EDITOR_PREVIEW_PRESETS.default;
+            const size = widgetCustomizerPreviewSize || fallback;
+            return {
+                width: clampWidgetPreviewDimension(size.width, fallback.width),
+                height: clampWidgetPreviewDimension(size.height, fallback.height)
+            };
+        }
+
+        function getWidgetLayoutPixelAxis(property) {
+            return property === 'y' || property === 'height' ? 'height' : 'width';
+        }
+
+        function widgetLayoutPercentToPx(property, percent) {
+            const dimensions = getWidgetCustomizerPreviewDimensions();
+            const axis = getWidgetLayoutPixelAxis(property);
+            return Math.round((Number(percent) || 0) * dimensions[axis] / 100);
+        }
+
+        function widgetLayoutPxToPercent(property, pixels) {
+            const dimensions = getWidgetCustomizerPreviewDimensions();
+            const axis = getWidgetLayoutPixelAxis(property);
+            return ((Number(pixels) || 0) / Math.max(1, dimensions[axis])) * 100;
+        }
+
+        function normalizeWidgetRotation(value) {
+            return ((Number(value || 0) + 180) % 360 + 360) % 360 - 180;
+        }
+
+        function getWidgetPointerAngleDegrees(clientX, clientY, centerX, centerY) {
+            return (Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI) + 90;
+        }
+
+        function getWidgetShortestAngleDelta(currentAngle, previousAngle) {
+            return normalizeWidgetRotation(Number(currentAngle || 0) - Number(previousAngle || 0));
+        }
+
+        function setWidgetRotationKnobValue(rotation) {
+            const knob = document.getElementById('widget-rotation-knob');
+            if (knob) knob.style.setProperty('--widget-rotation-deg', normalizeWidgetRotation(rotation) + 'deg');
+        }
+
+        function renderWidgetCustomizerControls() {
+            if (!widgetLayoutDraft) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            if (!layout) return;
+
+            const nameEl = document.getElementById('widget-selected-element-name');
+            const visibleInput = document.getElementById('widget-element-visible');
+            const objectColorAutoRow = document.getElementById('widget-object-color-auto-row');
+            const objectColorRow = document.getElementById('widget-object-color-row');
+            const objectColorAutoInput = document.getElementById('widget-object-color-auto');
+            const objectColorInput = document.getElementById('widget-object-color-input');
+            const textAlignRow = document.getElementById('widget-text-align-row');
+            const textColorAutoRow = document.getElementById('widget-text-color-auto-row');
+            const textColorRow = document.getElementById('widget-text-color-row');
+            const textColorAutoInput = document.getElementById('widget-text-color-auto');
+            const textColorInput = document.getElementById('widget-text-color-input');
+            const rotationInput = document.getElementById('widget-control-rotation-input');
+            if (nameEl) nameEl.innerText = getWidgetLayoutElementLabel(widgetCustomizerSelectedKey);
+            if (visibleInput) visibleInput.checked = layout.visible;
+
+            document.querySelectorAll('[data-widget-layout-property]').forEach(input => {
+                const property = input.dataset.widgetLayoutProperty;
+                let value = layout[property];
+                const usePixels = input.dataset.widgetLayoutUnit === 'px';
+                if (usePixels) {
+                    if (property === 'x') {
+                        input.min = String(widgetLayoutPercentToPx(property, getWidgetLayoutMinPosition(layout.width)));
+                        input.max = String(widgetLayoutPercentToPx(property, getWidgetLayoutMaxPosition(layout.width)));
+                    }
+                    if (property === 'y') {
+                        input.min = String(widgetLayoutPercentToPx(property, getWidgetLayoutMinPosition(layout.height)));
+                        input.max = String(widgetLayoutPercentToPx(property, getWidgetLayoutMaxPosition(layout.height)));
+                    }
+                    if (property === 'width' || property === 'height') {
+                        input.min = String(Math.max(1, widgetLayoutPercentToPx(property, getWidgetLayoutMinSize(widgetCustomizerSelectedKey))));
+                        input.max = String(getWidgetCustomizerPreviewDimensions()[getWidgetLayoutPixelAxis(property)]);
+                    }
+                    value = widgetLayoutPercentToPx(property, value);
+                } else if (property === 'rotation') {
+                    value = formatWidgetRotationInputValue(value);
+                } else if (property === 'opacity' || property === 'backgroundOpacity') {
+                    value *= 100;
+                }
+                input.value = String(value);
+
+                const output = document.getElementById('widget-control-' + property + '-value');
+                if (output) output.innerText = formatWidgetControlValue(property, layout[property]);
+            });
+            if (rotationInput) rotationInput.value = formatWidgetRotationInputValue(layout.rotation);
+            setWidgetRotationKnobValue(layout.rotation);
+
+            const hasObjectColor = isWidgetLayoutObjectColorElement(widgetCustomizerSelectedKey);
+            if (objectColorAutoRow) objectColorAutoRow.hidden = !hasObjectColor;
+            if (objectColorRow) objectColorRow.hidden = !hasObjectColor;
+            if (objectColorAutoInput) objectColorAutoInput.checked = layout.colorMode !== 'custom';
+            if (objectColorInput) {
+                objectColorInput.value = normalizeWidgetHexColor(layout.color, WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR);
+                objectColorInput.disabled = !hasObjectColor || layout.colorMode !== 'custom';
+            }
+
+            const hasTextControls = isWidgetLayoutTextElement(widgetCustomizerSelectedKey);
+            if (textAlignRow) textAlignRow.hidden = !hasTextControls;
+            if (textColorAutoRow) textColorAutoRow.hidden = !hasTextControls;
+            if (textColorRow) textColorRow.hidden = !hasTextControls;
+            if (textColorAutoInput) textColorAutoInput.checked = layout.textColorMode !== 'custom';
+            if (textColorInput) {
+                textColorInput.value = normalizeWidgetHexColor(layout.textColor, getWidgetTextDefault(widgetCustomizerSelectedKey).color);
+                textColorInput.disabled = !hasTextControls || layout.textColorMode !== 'custom';
+            }
+            document.querySelectorAll('[data-widget-text-align]').forEach(button => {
+                button.classList.toggle('active', hasTextControls && button.dataset.widgetTextAlign === layout.textAlign);
+            });
+        }
+
+        function updateWidgetCustomizerSelectionOverlay() {
+            const overlay = document.getElementById('widget-customizer-selection');
+            updateWidgetCustomizerOutsideState();
+            if (!overlay || !widgetLayoutDraft) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            if (!widgetCustomizerSelectionActive || !layout || !layout.visible) {
+                overlay.classList.add('is-hidden');
+                overlay.classList.remove('is-outside');
+                return;
+            }
+
+            overlay.classList.remove('is-hidden');
+            overlay.classList.toggle('is-outside', isWidgetLayoutOutOfBounds(layout));
+            overlay.style.left = layout.x + '%';
+            overlay.style.top = layout.y + '%';
+            overlay.style.width = layout.width + '%';
+            overlay.style.height = layout.height + '%';
+            overlay.style.transform = 'rotate(' + layout.rotation + 'deg)';
+        }
+
+        function clearWidgetCustomizerSelection() {
+            widgetCustomizerSelectionActive = false;
+            updateWidgetCustomizerSelectionOverlay();
+            renderWidgetCustomizerElementList();
+        }
+
+        function updateWidgetCustomizerOutsideState() {
+            const stage = document.getElementById('widget-customizer-stage');
+            const hasOutsideElement = !!(widgetLayoutDraft && WIDGET_LAYOUT_ELEMENT_KEYS.some(key => {
+                const layout = widgetLayoutDraft.elements[key];
+                return layout && layout.visible && isWidgetLayoutOutOfBounds(layout);
+            }));
+            if (stage) stage.classList.toggle('has-widget-outside-elements', hasOutsideElement);
+        }
+
+        function shouldKeepWidgetCustomizerSelectionForTarget(target) {
+            return !!(target && target.closest([
+                '#widget-customizer-stage',
+                '#widget-customizer-elements',
+                '.widget-customizer-controls',
+                '.widget-editor-options',
+                '.widget-source-settings',
+                '.widget-preset-panel',
+                '.widget-preview-toolbar-actions',
+                '.widget-customizer-footer',
+                'button',
+                'input',
+                'select',
+                'textarea',
+                'label'
+            ].join(',')));
+        }
+
+        function applyWidgetLayoutDraftToPreview(options = {}) {
+            if (!widgetLayoutDraft) return;
+            postWidgetCustomizerPreviewState({ retry: true });
+            if (widgetCustomizerDemoActive) publishNowPlayingWidgetState(getActiveWidgetPublishState());
+            updateWidgetCustomizerOutsideState();
+            updateWidgetCustomizerSelectionOverlay();
+            if (options.controls !== false) renderWidgetCustomizerControls();
+            if (options.elements) renderWidgetCustomizerElementList();
+        }
+
+        function selectWidgetCustomizerElement(key) {
+            if (!WIDGET_LAYOUT_ELEMENT_KEYS.includes(key) || !widgetLayoutDraft) return;
+            widgetCustomizerSelectedKey = key;
+            widgetCustomizerSelectionActive = true;
+            renderWidgetCustomizerElementList();
+            renderWidgetCustomizerControls();
+            updateWidgetCustomizerSelectionOverlay();
+        }
+
+        function reorderWidgetCustomizerLayer(fromIndex, toIndex) {
+            if (!widgetLayoutDraft) return;
+            const order = getWidgetLayoutOrder(widgetLayoutDraft);
+            if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex) || fromIndex === toIndex) return;
+            if (fromIndex < 0 || toIndex < 0 || fromIndex >= order.length || toIndex >= order.length) return;
+            pushWidgetLayoutHistory();
+            markWidgetCustomizerLayoutChanged();
+            const [movedKey] = order.splice(fromIndex, 1);
+            order.splice(toIndex, 0, movedKey);
+            widgetLayoutDraft.order = normalizeWidgetLayoutOrder(order);
+            widgetCustomizerSelectedKey = movedKey;
+            widgetCustomizerSelectionActive = true;
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview({ elements: true });
+        }
+
+        function setWidgetCustomizerElementVisibility(visible) {
+            if (!widgetLayoutDraft || !widgetLayoutDraft.elements[widgetCustomizerSelectedKey]) return;
+            pushWidgetLayoutHistory();
+            markWidgetCustomizerLayoutChanged();
+            widgetLayoutDraft.elements[widgetCustomizerSelectedKey].visible = !!visible;
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview({ elements: true });
+        }
+
+        function updateWidgetCustomizerObjectColorMode(matchCover) {
+            if (!widgetLayoutDraft || !isWidgetLayoutObjectColorElement(widgetCustomizerSelectedKey)) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            pushWidgetLayoutHistory();
+            markWidgetCustomizerLayoutChanged();
+            layout.colorMode = matchCover ? 'cover' : 'custom';
+            layout.color = normalizeWidgetHexColor(layout.color, WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR);
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function updateWidgetCustomizerObjectColor(value, input) {
+            if (!widgetLayoutDraft || !isWidgetLayoutObjectColorElement(widgetCustomizerSelectedKey)) return;
+            if (input && input.dataset.widgetHistoryActive !== 'true') {
+                pushWidgetLayoutHistory();
+                input.dataset.widgetHistoryActive = 'true';
+            }
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            markWidgetCustomizerLayoutChanged();
+            layout.colorMode = 'custom';
+            layout.color = normalizeWidgetHexColor(value, WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR);
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function updateWidgetCustomizerTextColorMode(useDefault) {
+            if (!widgetLayoutDraft || !isWidgetLayoutTextElement(widgetCustomizerSelectedKey)) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            pushWidgetLayoutHistory();
+            markWidgetCustomizerLayoutChanged();
+            layout.textColorMode = useDefault ? 'auto' : 'custom';
+            layout.textColor = normalizeWidgetHexColor(layout.textColor, getWidgetTextDefault(widgetCustomizerSelectedKey).color);
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function updateWidgetCustomizerTextColor(value, input) {
+            if (!widgetLayoutDraft || !isWidgetLayoutTextElement(widgetCustomizerSelectedKey)) return;
+            if (input && input.dataset.widgetHistoryActive !== 'true') {
+                pushWidgetLayoutHistory();
+                input.dataset.widgetHistoryActive = 'true';
+            }
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            markWidgetCustomizerLayoutChanged();
+            layout.textColorMode = 'custom';
+            layout.textColor = normalizeWidgetHexColor(value, getWidgetTextDefault(widgetCustomizerSelectedKey).color);
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function updateWidgetCustomizerTextAlign(align) {
+            if (!widgetLayoutDraft || !isWidgetLayoutTextElement(widgetCustomizerSelectedKey)) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            const nextAlign = normalizeWidgetTextAlign(align, getWidgetTextDefault(widgetCustomizerSelectedKey).align);
+            if (layout.textAlign === nextAlign) return;
+            pushWidgetLayoutHistory();
+            markWidgetCustomizerLayoutChanged();
+            layout.textAlign = nextAlign;
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function setWidgetCustomizerPreviewRatio(ratio) {
+            widgetCustomizerPreviewMode = WIDGET_EDITOR_PREVIEW_PRESETS[ratio] ? ratio : 'default';
+            widgetCustomizerPreviewSize = { ...getWidgetCustomizerPreviewPreset(widgetCustomizerPreviewMode) };
+            applyWidgetCustomizerPreviewSize();
+        }
+
+        function setWidgetCustomizerCustomPreviewSize() {
+            const widthInput = document.getElementById('widget-preview-width');
+            const heightInput = document.getElementById('widget-preview-height');
+            const fallback = widgetCustomizerPreviewSize || WIDGET_EDITOR_PREVIEW_PRESETS.default;
+            widgetCustomizerPreviewMode = 'custom';
+            widgetCustomizerPreviewSize = {
+                width: clampWidgetPreviewDimension(widthInput && widthInput.value, fallback.width),
+                height: clampWidgetPreviewDimension(heightInput && heightInput.value, fallback.height)
+            };
+            applyWidgetCustomizerPreviewSize();
+        }
+
+        function openWidgetCustomizer() {
+            const modal = document.getElementById('widget-customizer-modal');
+            if (!modal) return;
+            WIDGET_LAYOUT_CONFIG = readWidgetLayoutConfig();
+            widgetLayoutDraft = cloneWidgetLayoutForEditor(WIDGET_LAYOUT_CONFIG);
+            widgetCustomizerSelectedKey = 'title';
+            widgetCustomizerSelectionActive = false;
+            widgetCustomizerInteraction = null;
+            widgetLayoutHistory = [];
+            widgetCustomizerUsesOriginalLayout = !WIDGET_LAYOUT_CONFIG;
+            widgetCustomizerDraftDirty = false;
+            updateWidgetUndoButton();
+            widgetUrlBaseline = getWidgetUrl();
+            widgetUrlWarningEnabled = true;
+            updateWidgetUrlDisplay();
+            const snapInput = document.getElementById('widget-snap-enabled');
+            if (snapInput) snapInput.checked = widgetCustomizerSnapEnabled;
+            widgetLayoutPresets = loadWidgetLayoutPresets();
+            renderWidgetLayoutPresets();
+            modal.style.display = 'flex';
+            startWidgetCustomizerDemoMode();
+            widgetCustomizerPreviewMode = localStorage.getItem(WIDGET_EDITOR_PREVIEW_MODE_STORAGE_KEY) || widgetCustomizerPreviewMode || 'default';
+            widgetCustomizerPreviewSize = loadWidgetCustomizerPreviewSize(widgetCustomizerPreviewMode);
+            applyWidgetCustomizerPreviewSize({ save: false, sync: false });
+            renderWidgetCustomizerPreview();
+            if (widgetLayoutDraft) {
+                renderWidgetCustomizerElementList();
+                renderWidgetCustomizerControls();
+            } else {
+                measureWidgetCustomizerOriginalLayout();
+            }
+
+            const stage = document.getElementById('widget-customizer-stage');
+            if (widgetCustomizerResizeObserver) widgetCustomizerResizeObserver.disconnect();
+            if (stage && 'ResizeObserver' in window) {
+                widgetCustomizerResizeObserver = new ResizeObserver(() => {
+                    postWidgetCustomizerPreviewState();
+                    if (widgetCustomizerUsesOriginalLayout) measureWidgetCustomizerOriginalLayout();
+                    updateWidgetCustomizerSelectionOverlay();
+                });
+                widgetCustomizerResizeObserver.observe(stage);
+            }
+        }
+
+        function closeWidgetCustomizer() {
+            const modal = document.getElementById('widget-customizer-modal');
+            if (modal) modal.style.display = 'none';
+            widgetCustomizerInteraction = null;
+            hideWidgetSnapGuides();
+            stopWidgetCustomizerPreviewHeartbeat();
+            if (widgetCustomizerResizeObserver) widgetCustomizerResizeObserver.disconnect();
+            stopWidgetCustomizerDemoMode();
+        }
+
+        function saveWidgetLayout() {
+            if (widgetCustomizerUsesOriginalLayout && !widgetCustomizerDraftDirty) {
+                WIDGET_LAYOUT_CONFIG = writeWidgetLayoutConfig(null);
+                WIDGET_LAYOUT_REVISION = Number(localStorage.getItem(WIDGET_LAYOUT_REVISION_KEY)) || Date.now();
+                publishNowPlayingWidgetState(getActiveWidgetPublishState(), true);
+                showToast(t('ui_widget_layout_saved'), 'ok');
+                return;
+            }
+            const normalized = normalizeWidgetLayoutConfig(widgetLayoutDraft);
+            if (!normalized) return;
+            normalized.updatedAt = Date.now();
+            WIDGET_LAYOUT_CONFIG = writeWidgetLayoutConfig(normalized);
+            WIDGET_LAYOUT_REVISION = Number(localStorage.getItem(WIDGET_LAYOUT_REVISION_KEY)) || Date.now();
+            widgetCustomizerUsesOriginalLayout = false;
+            widgetCustomizerDraftDirty = false;
+            publishNowPlayingWidgetState(getActiveWidgetPublishState(), true);
+            showToast(t('ui_widget_layout_saved'), 'ok');
+        }
+
+        function resetWidgetLayoutWithConfirm() {
+            showConfirm(t('ui_widget_reset_layout_confirm'), () => {
+                WIDGET_LAYOUT_CONFIG = writeWidgetLayoutConfig(null);
+                WIDGET_LAYOUT_REVISION = Number(localStorage.getItem(WIDGET_LAYOUT_REVISION_KEY)) || Date.now();
+                widgetLayoutDraft = null;
+                widgetCustomizerUsesOriginalLayout = true;
+                widgetCustomizerDraftDirty = false;
+                widgetCustomizerSelectionActive = false;
+                widgetLayoutHistory = [];
+                updateWidgetUndoButton();
+                renderWidgetCustomizerPreview();
+                renderWidgetLayoutPresets();
+                renderWidgetCustomizerElementList();
+                renderWidgetCustomizerControls();
+                measureWidgetCustomizerOriginalLayout();
+                publishNowPlayingWidgetState(getActiveWidgetPublishState(), true);
+                showToast(t('ui_widget_layout_reset'), 'ok');
+            }, { okText: t('ui_widget_reset_layout') });
+        }
+
+        function hideWidgetSnapGuides() {
+            document.querySelectorAll('.widget-snap-guide').forEach(guide => guide.classList.remove('is-visible'));
+        }
+
+        function showWidgetSnapGuide(axis, value) {
+            const guide = document.querySelector('.widget-snap-guide-' + axis);
+            if (!guide) return;
+            guide.style[axis === 'x' ? 'left' : 'top'] = value + '%';
+            guide.classList.add('is-visible');
+        }
+
+        function getWidgetSnapCandidates(axis, excludedKey) {
+            const candidates = [0, 50, 100];
+            if (!widgetLayoutDraft) return candidates;
+            WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
+                if (key === excludedKey) return;
+                const element = widgetLayoutDraft.elements[key];
+                if (!element || !element.visible) return;
+                if (axis === 'x') candidates.push(element.x, element.x + element.width / 2, element.x + element.width);
+                else candidates.push(element.y, element.y + element.height / 2, element.y + element.height);
+            });
+            return candidates;
+        }
+
+        function findWidgetSnap(points, candidates, threshold) {
+            let best = null;
+            points.forEach(point => {
+                candidates.forEach(candidate => {
+                    const delta = candidate - point;
+                    if (Math.abs(delta) > threshold) return;
+                    if (!best || Math.abs(delta) < Math.abs(best.delta)) best = { delta, candidate };
+                });
+            });
+            return best;
+        }
+
+        function applyWidgetMoveSnapping(layout, event, interaction) {
+            hideWidgetSnapGuides();
+            if (!widgetCustomizerSnapEnabled || event.altKey) return;
+            const thresholdX = (8 / Math.max(1, interaction.rect.width)) * 100;
+            const thresholdY = (8 / Math.max(1, interaction.rect.height)) * 100;
+            const snapX = findWidgetSnap(
+                [layout.x, layout.x + layout.width / 2, layout.x + layout.width],
+                getWidgetSnapCandidates('x', widgetCustomizerSelectedKey),
+                thresholdX
+            );
+            const snapY = findWidgetSnap(
+                [layout.y, layout.y + layout.height / 2, layout.y + layout.height],
+                getWidgetSnapCandidates('y', widgetCustomizerSelectedKey),
+                thresholdY
+            );
+            if (snapX) {
+                layout.x = clampWidgetLayoutNumber(layout.x + snapX.delta, getWidgetLayoutMinPosition(layout.width), getWidgetLayoutMaxPosition(layout.width), layout.x);
+                showWidgetSnapGuide('x', snapX.candidate);
+            }
+            if (snapY) {
+                layout.y = clampWidgetLayoutNumber(layout.y + snapY.delta, getWidgetLayoutMinPosition(layout.height), getWidgetLayoutMaxPosition(layout.height), layout.y);
+                showWidgetSnapGuide('y', snapY.candidate);
+            }
+        }
+
+        function applyWidgetResizeSnapping(layout, direction, event, interaction) {
+            hideWidgetSnapGuides();
+            if (!widgetCustomizerSnapEnabled || event.altKey) return;
+            const minSize = getWidgetLayoutMinSize(widgetCustomizerSelectedKey);
+            const thresholdX = (8 / Math.max(1, interaction.rect.width)) * 100;
+            const thresholdY = (8 / Math.max(1, interaction.rect.height)) * 100;
+            const xCandidates = getWidgetSnapCandidates('x', widgetCustomizerSelectedKey);
+            const yCandidates = getWidgetSnapCandidates('y', widgetCustomizerSelectedKey);
+
+            if (direction.includes('e')) {
+                const snap = findWidgetSnap([layout.x + layout.width], xCandidates, thresholdX);
+                if (snap) {
+                    layout.width = Math.max(minSize, snap.candidate - layout.x);
+                    showWidgetSnapGuide('x', snap.candidate);
+                }
+            } else if (direction.includes('w')) {
+                const right = layout.x + layout.width;
+                const snap = findWidgetSnap([layout.x], xCandidates, thresholdX);
+                if (snap && right - snap.candidate >= minSize) {
+                    const nextX = clampWidgetLayoutNumber(snap.candidate, getWidgetLayoutMinPosition(layout.width), getWidgetLayoutMaxPosition(layout.width), layout.x);
+                    layout.x = nextX;
+                    layout.width = right - nextX;
+                    showWidgetSnapGuide('x', snap.candidate);
+                }
+            }
+
+            if (direction.includes('s')) {
+                const snap = findWidgetSnap([layout.y + layout.height], yCandidates, thresholdY);
+                if (snap) {
+                    layout.height = Math.max(minSize, snap.candidate - layout.y);
+                    showWidgetSnapGuide('y', snap.candidate);
+                }
+            } else if (direction.includes('n')) {
+                const bottom = layout.y + layout.height;
+                const snap = findWidgetSnap([layout.y], yCandidates, thresholdY);
+                if (snap && bottom - snap.candidate >= minSize) {
+                    const nextY = clampWidgetLayoutNumber(snap.candidate, getWidgetLayoutMinPosition(layout.height), getWidgetLayoutMaxPosition(layout.height), layout.y);
+                    layout.y = nextY;
+                    layout.height = bottom - nextY;
+                    showWidgetSnapGuide('y', snap.candidate);
+                }
+            }
+        }
+
+        function getWidgetCustomizerElementAtPoint(clientX, clientY) {
+            const stage = document.getElementById('widget-customizer-stage');
+            if (!stage || !widgetLayoutDraft) return '';
+            const rect = stage.getBoundingClientRect();
+            if (!rect.width || !rect.height) return '';
+            const x = ((clientX - rect.left) / rect.width) * 100;
+            const y = ((clientY - rect.top) / rect.height) * 100;
+            return getWidgetLayoutHitTestOrder(widgetLayoutDraft).find(key => {
+                const layout = widgetLayoutDraft.elements[key];
+                if (!layout || !layout.visible) return false;
+                return x >= layout.x && x <= layout.x + layout.width && y >= layout.y && y <= layout.y + layout.height;
+            }) || '';
+        }
+
+        function beginWidgetRotationControl(event) {
+            if (!widgetLayoutDraft) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            const knob = event.target.closest('[data-widget-rotation-knob]');
+            if (!layout || !knob) return;
+            pushWidgetLayoutHistory();
+            hideWidgetSnapGuides();
+            const rect = knob.getBoundingClientRect();
+            const pointerAngle = getWidgetPointerAngleDegrees(event.clientX, event.clientY, rect.left + rect.width / 2, rect.top + rect.height / 2);
+            widgetCustomizerInteraction = {
+                mode: 'control-rotate',
+                centerX: rect.left + rect.width / 2,
+                centerY: rect.top + rect.height / 2,
+                lastPointerAngle: pointerAngle,
+                unwrappedRotation: Number(layout.rotation) || 0,
+                layout: { ...layout }
+            };
+            const card = getWidgetCustomizerPreviewCard();
+            const activeElement = card && card.querySelector('[data-widget-element="' + widgetCustomizerSelectedKey + '"]');
+            const overlay = document.getElementById('widget-customizer-selection');
+            if (activeElement) activeElement.classList.add('is-layout-active');
+            if (overlay) overlay.classList.add('is-interacting');
+            knob.classList.add('is-rotating');
+            event.preventDefault();
+            event.stopPropagation();
+            handleWidgetCustomizerPointerMove(event);
+        }
+
+        function beginWidgetCustomizerInteraction(event, mode) {
+            if (!widgetLayoutDraft) return;
+            const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            const stage = document.getElementById('widget-customizer-stage');
+            const overlay = document.getElementById('widget-customizer-selection');
+            if (!layout || !layout.visible || !stage || !overlay) return;
+
+            pushWidgetLayoutHistory();
+            hideWidgetSnapGuides();
+            const rect = stage.getBoundingClientRect();
+            const centerX = rect.left + ((layout.x + layout.width / 2) / 100) * rect.width;
+            const centerY = rect.top + ((layout.y + layout.height / 2) / 100) * rect.height;
+            widgetCustomizerInteraction = {
+                mode,
+                rect,
+                startX: event.clientX,
+                startY: event.clientY,
+                centerX,
+                centerY,
+                lastPointerAngle: getWidgetPointerAngleDegrees(event.clientX, event.clientY, centerX, centerY),
+                unwrappedRotation: Number(layout.rotation) || 0,
+                layout: { ...layout }
+            };
+
+            const card = getWidgetCustomizerPreviewCard();
+            const activeElement = card && card.querySelector('[data-widget-element="' + widgetCustomizerSelectedKey + '"]');
+            if (activeElement) activeElement.classList.add('is-layout-active');
+            overlay.classList.add('is-interacting');
+            event.preventDefault();
+        }
+
+        function handleWidgetCustomizerPointerMove(event) {
+            if (!widgetCustomizerInteraction || !widgetLayoutDraft) return;
+            const interaction = widgetCustomizerInteraction;
+            const next = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+            const start = interaction.layout;
+            const minSize = getWidgetLayoutMinSize(widgetCustomizerSelectedKey);
+            if (interaction.mode === 'control-rotate') {
+                hideWidgetSnapGuides();
+                const angle = getWidgetPointerAngleDegrees(event.clientX, event.clientY, interaction.centerX, interaction.centerY);
+                const delta = getWidgetShortestAngleDelta(angle, interaction.lastPointerAngle);
+                interaction.lastPointerAngle = angle;
+                interaction.unwrappedRotation += delta;
+                let rotation = normalizeWidgetRotation(interaction.unwrappedRotation);
+                if (event.shiftKey) rotation = Math.round(rotation / 15) * 15;
+                next.rotation = rotation;
+                widgetLayoutDraft.updatedAt = Date.now();
+                markWidgetCustomizerLayoutChanged();
+                applyWidgetLayoutDraftToPreview();
+                return;
+            }
+            const dx = ((event.clientX - interaction.startX) / Math.max(1, interaction.rect.width)) * 100;
+            const dy = ((event.clientY - interaction.startY) / Math.max(1, interaction.rect.height)) * 100;
+            markWidgetCustomizerLayoutChanged();
+
+            if (interaction.mode === 'move') {
+                next.x = clampWidgetLayoutNumber(start.x + dx, getWidgetLayoutMinPosition(start.width), getWidgetLayoutMaxPosition(start.width), start.x);
+                next.y = clampWidgetLayoutNumber(start.y + dy, getWidgetLayoutMinPosition(start.height), getWidgetLayoutMaxPosition(start.height), start.y);
+                applyWidgetMoveSnapping(next, event, interaction);
+            } else if (interaction.mode.startsWith('resize-')) {
+                const direction = interaction.mode.replace('resize-', '');
+                if (direction === 'se') {
+                    const scaleFromWidth = 1 + (dx / Math.max(1, start.width));
+                    const scaleFromHeight = 1 + (dy / Math.max(1, start.height));
+                    const dominantScale = Math.abs(scaleFromWidth - 1) >= Math.abs(scaleFromHeight - 1) ? scaleFromWidth : scaleFromHeight;
+                    const minScale = Math.max(minSize / Math.max(1, start.width), minSize / Math.max(1, start.height));
+                    const maxScale = Math.min((100 - start.x) / Math.max(1, start.width), (100 - start.y) / Math.max(1, start.height));
+                    const scale = clampWidgetLayoutNumber(dominantScale, minScale, Math.max(minScale, maxScale), 1);
+                    next.width = start.width * scale;
+                    next.height = start.height * scale;
+                    hideWidgetSnapGuides();
+                } else {
+                    if (direction.includes('e')) next.width = clampWidgetLayoutNumber(start.width + dx, minSize, Math.max(minSize, 100 - start.x + 3), start.width);
+                    if (direction.includes('s')) next.height = clampWidgetLayoutNumber(start.height + dy, minSize, Math.max(minSize, 100 - start.y + 3), start.height);
+                    if (direction.includes('w')) {
+                        const right = start.x + start.width;
+                        next.x = clampWidgetLayoutNumber(start.x + dx, getWidgetLayoutMinPosition(start.width), right - minSize, start.x);
+                        next.width = right - next.x;
+                    }
+                    if (direction.includes('n')) {
+                        const bottom = start.y + start.height;
+                        next.y = clampWidgetLayoutNumber(start.y + dy, getWidgetLayoutMinPosition(start.height), bottom - minSize, start.y);
+                        next.height = bottom - next.y;
+                    }
+                    applyWidgetResizeSnapping(next, direction, event, interaction);
+                }
+            } else if (interaction.mode === 'rotate') {
+                hideWidgetSnapGuides();
+                const angle = getWidgetPointerAngleDegrees(event.clientX, event.clientY, interaction.centerX, interaction.centerY);
+                const delta = getWidgetShortestAngleDelta(angle, interaction.lastPointerAngle);
+                interaction.lastPointerAngle = angle;
+                interaction.unwrappedRotation += delta;
+                let rotation = normalizeWidgetRotation(interaction.unwrappedRotation);
+                if (event.shiftKey) rotation = Math.round(rotation / 15) * 15;
+                next.rotation = rotation;
+            }
+
+            widgetLayoutDraft.updatedAt = Date.now();
+            applyWidgetLayoutDraftToPreview();
+        }
+
+        function endWidgetCustomizerInteraction() {
+            if (!widgetCustomizerInteraction) return;
+            widgetCustomizerInteraction = null;
+            hideWidgetSnapGuides();
+            const overlay = document.getElementById('widget-customizer-selection');
+            const card = getWidgetCustomizerPreviewCard();
+            if (overlay) overlay.classList.remove('is-interacting');
+            if (card) card.querySelectorAll('.is-layout-active').forEach(element => element.classList.remove('is-layout-active'));
+            document.querySelectorAll('.widget-rotation-knob.is-rotating').forEach(knob => knob.classList.remove('is-rotating'));
+            renderWidgetCustomizerControls();
+        }
+
+        function bindWidgetCustomizerEvents() {
+            if (widgetCustomizerEventsBound) return;
+            const modal = document.getElementById('widget-customizer-modal');
+            const stage = document.getElementById('widget-customizer-stage');
+            const workspace = document.querySelector('.widget-customizer-workspace');
+            const overlay = document.getElementById('widget-customizer-selection');
+            const elements = document.getElementById('widget-customizer-elements');
+            const controls = document.querySelector('.widget-customizer-controls');
+            const visibleInput = document.getElementById('widget-element-visible');
+            const snapInput = document.getElementById('widget-snap-enabled');
+            const deleteButton = overlay && overlay.querySelector('.widget-editor-delete');
+            const previewWidthInput = document.getElementById('widget-preview-width');
+            const previewHeightInput = document.getElementById('widget-preview-height');
+            const presetAddButton = document.getElementById('widget-preset-add');
+            const presetList = document.getElementById('widget-preset-list');
+            const presetNameInput = document.getElementById('widget-preset-name-input');
+            const objectColorAutoInput = document.getElementById('widget-object-color-auto');
+            const objectColorInput = document.getElementById('widget-object-color-input');
+            const textColorAutoInput = document.getElementById('widget-text-color-auto');
+            const textColorInput = document.getElementById('widget-text-color-input');
+            const textAlignRow = document.getElementById('widget-text-align-row');
+            const rotationKnob = document.getElementById('widget-rotation-knob');
+            if (!modal || !stage || !workspace || !overlay || !elements || !controls || !visibleInput || !snapInput || !deleteButton || !presetAddButton || !presetList || !presetNameInput) return;
+            widgetCustomizerEventsBound = true;
+
+            elements.addEventListener('click', event => {
+                const button = event.target.closest('[data-widget-element-key]');
+                if (button) selectWidgetCustomizerElement(button.dataset.widgetElementKey);
+            });
+            elements.addEventListener('dragstart', event => {
+                const item = event.target.closest('[data-widget-element-key]');
+                if (!item) return;
+                widgetLayerDragSourceIndex = Number(item.dataset.widgetLayerIndex);
+                item.classList.add('is-dragging');
+                if (event.dataTransfer) {
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', item.dataset.widgetElementKey || '');
+                }
+            });
+            elements.addEventListener('dragover', event => {
+                const item = event.target.closest('[data-widget-element-key]');
+                if (!item || widgetLayerDragSourceIndex === null) return;
+                event.preventDefault();
+                item.classList.add('drag-over');
+                if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+            });
+            elements.addEventListener('dragleave', event => {
+                const item = event.target.closest('[data-widget-element-key]');
+                if (item) item.classList.remove('drag-over');
+            });
+            elements.addEventListener('drop', event => {
+                const item = event.target.closest('[data-widget-element-key]');
+                if (!item || widgetLayerDragSourceIndex === null) return;
+                event.preventDefault();
+                const targetIndex = Number(item.dataset.widgetLayerIndex);
+                item.classList.remove('drag-over');
+                reorderWidgetCustomizerLayer(widgetLayerDragSourceIndex, targetIndex);
+                widgetLayerDragSourceIndex = null;
+            });
+            elements.addEventListener('dragend', () => {
+                widgetLayerDragSourceIndex = null;
+                elements.querySelectorAll('.is-dragging, .drag-over').forEach(item => item.classList.remove('is-dragging', 'drag-over'));
+            });
+
+            controls.addEventListener('input', event => {
+                const input = event.target.closest('[data-widget-layout-property]');
+                if (!input || !widgetLayoutDraft) return;
+                const property = input.dataset.widgetLayoutProperty;
+                const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+                let value = Number(input.value);
+                if (!Number.isFinite(value)) return;
+                if (input.dataset.widgetHistoryActive !== 'true') {
+                    pushWidgetLayoutHistory();
+                    input.dataset.widgetHistoryActive = 'true';
+                }
+                markWidgetCustomizerLayoutChanged();
+                if (input.dataset.widgetLayoutUnit === 'px') {
+                    value = widgetLayoutPxToPercent(property, value);
+                    if (property === 'x') value = clampWidgetLayoutNumber(value, getWidgetLayoutMinPosition(layout.width), getWidgetLayoutMaxPosition(layout.width), layout.x);
+                    if (property === 'y') value = clampWidgetLayoutNumber(value, getWidgetLayoutMinPosition(layout.height), getWidgetLayoutMaxPosition(layout.height), layout.y);
+                    if (property === 'width' || property === 'height') value = clampWidgetLayoutNumber(value, getWidgetLayoutMinSize(widgetCustomizerSelectedKey), 100, layout[property]);
+                } else if (property === 'rotation') {
+                    value = normalizeWidgetRotation(clampWidgetLayoutNumber(value, 0, 359, formatWidgetRotationInputValue(layout.rotation)));
+                } else if (property === 'opacity' || property === 'backgroundOpacity') {
+                    value = clampWidgetLayoutNumber(value / 100, 0, 1, layout[property]);
+                }
+                layout[property] = value;
+                if (property === 'rotation') setWidgetRotationKnobValue(value);
+                layout.x = clampWidgetLayoutNumber(layout.x, getWidgetLayoutMinPosition(layout.width), getWidgetLayoutMaxPosition(layout.width), 0);
+                layout.y = clampWidgetLayoutNumber(layout.y, getWidgetLayoutMinPosition(layout.height), getWidgetLayoutMaxPosition(layout.height), 0);
+                widgetLayoutDraft.updatedAt = Date.now();
+                applyWidgetLayoutDraftToPreview();
+            });
+
+            controls.addEventListener('change', event => {
+                const input = event.target.closest('[data-widget-layout-property]');
+                if (!input) return;
+                delete input.dataset.widgetHistoryActive;
+                if (input.dataset.widgetLayoutProperty === 'rotation' && widgetLayoutDraft) {
+                    const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
+                    if (layout) input.value = formatWidgetRotationInputValue(layout.rotation);
+                }
+            });
+
+            visibleInput.addEventListener('change', () => setWidgetCustomizerElementVisibility(visibleInput.checked));
+            if (objectColorAutoInput) objectColorAutoInput.addEventListener('change', () => updateWidgetCustomizerObjectColorMode(objectColorAutoInput.checked));
+            if (objectColorInput) {
+                objectColorInput.addEventListener('input', () => updateWidgetCustomizerObjectColor(objectColorInput.value, objectColorInput));
+                objectColorInput.addEventListener('change', () => { delete objectColorInput.dataset.widgetHistoryActive; });
+            }
+            if (textColorAutoInput) textColorAutoInput.addEventListener('change', () => updateWidgetCustomizerTextColorMode(textColorAutoInput.checked));
+            if (textColorInput) {
+                textColorInput.addEventListener('input', () => updateWidgetCustomizerTextColor(textColorInput.value, textColorInput));
+                textColorInput.addEventListener('change', () => { delete textColorInput.dataset.widgetHistoryActive; });
+            }
+            if (textAlignRow) {
+                textAlignRow.addEventListener('click', event => {
+                    const button = event.target.closest('[data-widget-text-align]');
+                    if (button) updateWidgetCustomizerTextAlign(button.dataset.widgetTextAlign);
+                });
+            }
+            if (rotationKnob) rotationKnob.addEventListener('pointerdown', beginWidgetRotationControl);
+            snapInput.addEventListener('change', () => {
+                widgetCustomizerSnapEnabled = snapInput.checked;
+                localStorage.setItem(WIDGET_EDITOR_SNAP_STORAGE_KEY, widgetCustomizerSnapEnabled ? 'true' : 'false');
+                hideWidgetSnapGuides();
+            });
+            if (previewWidthInput && previewHeightInput) {
+                const updateCustomPreviewSize = () => setWidgetCustomizerCustomPreviewSize();
+                previewWidthInput.addEventListener('input', updateCustomPreviewSize);
+                previewHeightInput.addEventListener('input', updateCustomPreviewSize);
+                previewWidthInput.addEventListener('change', updateCustomPreviewSize);
+                previewHeightInput.addEventListener('change', updateCustomPreviewSize);
+            }
+            presetAddButton.addEventListener('click', addWidgetLayoutPreset);
+            presetNameInput.addEventListener('keydown', event => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                addWidgetLayoutPreset();
+            });
+            presetList.addEventListener('click', event => {
+                const deleteButton = event.target.closest('[data-widget-preset-delete]');
+                if (deleteButton) {
+                    deleteWidgetLayoutPreset(deleteButton.dataset.widgetPresetDelete);
+                    return;
+                }
+                const favoriteButton = event.target.closest('[data-widget-preset-favorite]');
+                if (favoriteButton) {
+                    toggleWidgetLayoutPresetFavorite(favoriteButton.dataset.widgetPresetFavorite);
+                    return;
+                }
+                const loadButton = event.target.closest('[data-widget-preset-load]');
+                if (loadButton) loadWidgetLayoutPreset(loadButton.dataset.widgetPresetLoad);
+            });
+
+            modal.addEventListener('click', event => {
+                const ratioButton = event.target.closest('[data-widget-preview-ratio]');
+                if (ratioButton) setWidgetCustomizerPreviewRatio(ratioButton.dataset.widgetPreviewRatio);
+            });
+
+            workspace.addEventListener('pointerdown', event => {
+                if (event.target.closest('#widget-customizer-stage')) return;
+                if (event.target.closest('.widget-preset-panel, .widget-preview-toolbar-actions')) return;
+                clearWidgetCustomizerSelection();
+            });
+
+            modal.addEventListener('pointerdown', event => {
+                if (event.target === modal || !shouldKeepWidgetCustomizerSelectionForTarget(event.target)) {
+                    clearWidgetCustomizerSelection();
+                }
+            });
+
+            stage.addEventListener('pointerdown', event => {
+                if (event.target.closest('#widget-customizer-selection')) return;
+                const target = event.target.closest('[data-widget-element]');
+                const key = getWidgetCustomizerElementAtPoint(event.clientX, event.clientY) || (target ? target.dataset.widgetElement : '');
+                if (!key) {
+                    clearWidgetCustomizerSelection();
+                    return;
+                }
+                selectWidgetCustomizerElement(key);
+                beginWidgetCustomizerInteraction(event, 'move');
+            });
+
+            overlay.addEventListener('pointerdown', event => {
+                if (event.target.closest('.widget-editor-delete')) return;
+                const resizeHandle = event.target.closest('[data-resize-direction]');
+                const rotateHandle = event.target.closest('.widget-editor-rotate');
+                if (!resizeHandle && !rotateHandle) {
+                    const key = getWidgetCustomizerElementAtPoint(event.clientX, event.clientY);
+                    if (key && key !== widgetCustomizerSelectedKey) selectWidgetCustomizerElement(key);
+                }
+                const mode = resizeHandle ? 'resize-' + resizeHandle.dataset.resizeDirection :
+                    (rotateHandle ? 'rotate' : 'move');
+                beginWidgetCustomizerInteraction(event, mode);
+            });
+
+            deleteButton.addEventListener('pointerdown', event => event.stopPropagation());
+            deleteButton.addEventListener('click', () => setWidgetCustomizerElementVisibility(false));
+            window.addEventListener('pointermove', handleWidgetCustomizerPointerMove);
+            window.addEventListener('pointerup', endWidgetCustomizerInteraction);
+            window.addEventListener('pointercancel', endWidgetCustomizerInteraction);
+            window.addEventListener('keydown', event => {
+                if (modal.style.display !== 'flex' || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z' || event.shiftKey) return;
+                event.preventDefault();
+                undoWidgetLayout();
+            });
         }
 
         function showToast(message, type = 'normal', durationMs = 6500) {
@@ -1791,6 +3503,9 @@ setInterval(monitorWidgetConnection, 1000);
         }
 
         function getActiveWidgetPublishState() {
+            if (widgetCustomizerDemoActive) {
+                return getWidgetCustomizerDemoState();
+            }
             if (widgetTestState) {
                 if (Date.now() < widgetTestStateUntil) {
                     return { ...widgetTestState, updatedAt: Date.now() };
@@ -2351,6 +4066,10 @@ setInterval(monitorWidgetConnection, 1000);
                 'ytm_sr_global_queue_limit_enabled',
                 'ytm_sr_require_music_category',
                 'ytm_widget_audio_enabled',
+                WIDGET_LAYOUT_STORAGE_KEY,
+                WIDGET_LAYOUT_REVISION_KEY,
+                WIDGET_LAYOUT_PRESETS_STORAGE_KEY,
+                WIDGET_EDITOR_SNAP_STORAGE_KEY,
                 'ytm_base_playlists',
                 'ytm_banned_songs',
                 'ytm_tutorial_seen'
@@ -2421,6 +4140,10 @@ setInterval(monitorWidgetConnection, 1000);
                 'ytm_sr_global_queue_limit_enabled',
                 'ytm_sr_require_music_category',
                 'ytm_widget_audio_enabled',
+                WIDGET_LAYOUT_STORAGE_KEY,
+                WIDGET_LAYOUT_REVISION_KEY,
+                WIDGET_LAYOUT_PRESETS_STORAGE_KEY,
+                WIDGET_EDITOR_SNAP_STORAGE_KEY,
                 'ytm_base_playlists',
                 'ytm_banned_songs',
                 'ytm_tutorial_seen'
@@ -2638,11 +4361,14 @@ setInterval(monitorWidgetConnection, 1000);
 
         function updateWidgetUrlWarning(currentUrl) {
             const warning = document.getElementById('widget-url-warning');
-            if (!warning) return;
+            const container = document.querySelector('.widget-customizer-header-url');
+            if (!warning && !container) return;
             const lastCopiedUrl = localStorage.getItem(WIDGET_LAST_COPIED_URL_KEY) || '';
             const changedAfterCopy = !!lastCopiedUrl && lastCopiedUrl !== currentUrl;
             const changedAfterOpen = widgetUrlWarningEnabled && !!widgetUrlBaseline && widgetUrlBaseline !== currentUrl;
-            warning.classList.toggle('is-hidden', !changedAfterCopy && !changedAfterOpen);
+            const needsCopy = changedAfterCopy || changedAfterOpen;
+            if (warning) warning.classList.toggle('is-hidden', !needsCopy);
+            if (container) container.classList.toggle('needs-widget-url-copy', needsCopy);
         }
 
         function updateWidgetUrlDisplay() {
@@ -3177,22 +4903,24 @@ setInterval(monitorWidgetConnection, 1000);
             const thumbnail = 'https://i.ytimg.com/vi/' + escapeHtml(song.id) + '/mqdefault.jpg';
 
             return '<div id="' + prefix + '-card" class="now-playing-card ' + (options.className || '') + '" ' + dropAttrs + '>' +
-                '<img class="np-card-cover" src="' + thumbnail + '" alt="">' +
+                '<img class="np-card-cover" data-widget-element="cover" src="' + thumbnail + '" alt="">' +
+                '<div class="np-card-info-bg" data-widget-element="infoBackground" aria-hidden="true"></div>' +
+                '<div class="np-card-meter-bg" data-widget-element="meterBackground" aria-hidden="true"></div>' +
                 '<div class="np-card-main">' +
                     '<div class="np-card-info">' +
-                        '<div class="np-card-title" title="' + title + '">' + title + '</div>' +
-                        '<div class="np-card-author" title="' + author + '">' + author + '</div>' +
+                        '<div class="np-card-title" data-widget-element="title" title="' + title + '">' + title + '</div>' +
+                        '<div class="np-card-author" data-widget-element="author" title="' + author + '">' + author + '</div>' +
                     '</div>' +
                     '<div class="np-card-meter">' +
-                        '<span id="' + prefix + '-current" class="np-card-time">0:00</span>' +
-                        '<div id="' + prefix + '-wave" class="np-card-wave" aria-hidden="true">' + createNowPlayingWaveBars() + '</div>' +
-                        '<span id="' + prefix + '-duration" class="np-card-time">' + formatTime(song.duration || 0) + '</span>' +
+                        '<span id="' + prefix + '-current" class="np-card-time" data-widget-element="currentTime">0:00</span>' +
+                        '<div id="' + prefix + '-wave" class="np-card-wave" data-widget-element="waveform" aria-hidden="true">' + createNowPlayingWaveBars() + '</div>' +
+                        '<span id="' + prefix + '-duration" class="np-card-time" data-widget-element="duration">' + formatTime(song.duration || 0) + '</span>' +
                     '</div>' +
                 '</div>' +
-                '<span class="np-card-user">' + user + '</span>' +
+                '<span class="np-card-user" data-widget-element="requester">' + user + '</span>' +
                 favoriteButton +
                 banButton +
-                '<div class="np-card-progress"><div id="' + prefix + '-progress" class="np-card-progress-fill"></div></div>' +
+                '<div class="np-card-progress" data-widget-element="progress"><div id="' + prefix + '-progress" class="np-card-progress-fill"></div></div>' +
             '</div>';
         }
 
@@ -3292,15 +5020,21 @@ setInterval(monitorWidgetConnection, 1000);
         }
 
         function publishNowPlayingWidgetState(state = getNowPlayingWidgetState(), forceStreamerBot = false) {
+            const stateHasLayout = Object.prototype.hasOwnProperty.call(state, 'widgetLayout');
+            const publishedState = {
+                ...state,
+                widgetLayout: stateHasLayout ? normalizeWidgetLayoutConfig(state.widgetLayout) : WIDGET_LAYOUT_CONFIG,
+                widgetLayoutRevision: WIDGET_LAYOUT_REVISION
+            };
             try {
-                localStorage.setItem(NOW_PLAYING_WIDGET_KEY, JSON.stringify(state));
+                localStorage.setItem(NOW_PLAYING_WIDGET_KEY, JSON.stringify(publishedState));
             } catch (error) {}
 
             if (nowPlayingWidgetChannel) {
-                try { nowPlayingWidgetChannel.postMessage(state); } catch (error) {}
+                try { nowPlayingWidgetChannel.postMessage(publishedState); } catch (error) {}
             }
 
-            publishNowPlayingWidgetStateToStreamerBot(state, forceStreamerBot);
+            publishNowPlayingWidgetStateToStreamerBot(publishedState, forceStreamerBot);
         }
 
         function publishNowPlayingWidgetStartupBurst() {
@@ -3774,6 +5508,11 @@ setInterval(monitorWidgetConnection, 1000);
             return !!userKey && userKey !== 'auto' && userKey !== 'streamer';
         }
 
+        function isRequestOrManualSong(song) {
+            const userKey = getRequestUserKey(song && song.user);
+            return !!userKey && userKey !== 'auto';
+        }
+
         function getActiveViewerRequestSongs() {
             return [currentSongInfo, ...playQueue].filter(isViewerRequestSong);
         }
@@ -3906,6 +5645,78 @@ setInterval(monitorWidgetConnection, 1000);
                 }));
             }
             else sendChatMessage(t('msg_nothing_playing', {user: user}));
+        }
+
+        function getCurrentSongRemainingSeconds() {
+            if (!currentSongInfo) return 0;
+            const fallbackDuration = currentSongInfo.duration || 210;
+            let duration = fallbackDuration;
+            let currentTime = 0;
+            try {
+                if (player && typeof player.getDuration === 'function') duration = player.getDuration() || fallbackDuration;
+                if (player && typeof player.getCurrentTime === 'function') currentTime = player.getCurrentTime() || 0;
+            } catch (error) {}
+            return Math.max(0, Math.round(duration - currentTime));
+        }
+
+        function estimateSecondsUntilQueueIndex(index) {
+            let seconds = currentSongInfo ? getCurrentSongRemainingSeconds() : 0;
+            for (let i = 0; i < index; i++) {
+                seconds += playQueue[i].duration || 210;
+            }
+            return Math.max(0, Math.round(seconds));
+        }
+
+        function trimChatListText(text, limit = 420) {
+            const value = String(text || '').trim();
+            if (value.length <= limit) return value;
+            return value.slice(0, Math.max(0, limit - 3)).trimEnd() + '...';
+        }
+
+        function handleWhenSong(user) {
+            const viewer = user || 'Viewer';
+            const userKey = getRequestUserKey(viewer);
+
+            if (currentSongInfo && getRequestUserKey(currentSongInfo.user) === userKey) {
+                sendChatMessage(t('msg_when_current', {
+                    user: viewer,
+                    title: currentSongInfo.title
+                }));
+                return;
+            }
+
+            const queueIndex = playQueue.findIndex(song => getRequestUserKey(song.user) === userKey);
+            if (queueIndex === -1) {
+                sendChatMessage(t('msg_when_none', { user: viewer }));
+                return;
+            }
+
+            const song = playQueue[queueIndex];
+            const etaSeconds = estimateSecondsUntilQueueIndex(queueIndex);
+            sendChatMessage(t('msg_when_next', {
+                user: viewer,
+                title: song.title,
+                m: Math.floor(etaSeconds / 60),
+                s: etaSeconds % 60
+            }));
+        }
+
+        function handleQueueSongs(user) {
+            const viewer = user || 'Viewer';
+            const current = currentSongInfo && isRequestOrManualSong(currentSongInfo) ? currentSongInfo.title : '-';
+            const nextSongs = playQueue.filter(isRequestOrManualSong).slice(0, 10);
+            const queue = trimChatListText(nextSongs.map(song => song.title).join(' | ')) || '-';
+
+            if (current === '-' && queue === '-') {
+                sendChatMessage(t('msg_queue_empty', { user: viewer }));
+                return;
+            }
+
+            sendChatMessage(t('msg_queue_list', {
+                user: viewer,
+                current,
+                queue
+            }));
         }
 
         function handleSkipSong(user) { 
@@ -4309,6 +6120,8 @@ setInterval(monitorWidgetConnection, 1000);
                         }
                         else if (inner.type === "SONG_REQUEST_FORCE") addSongFromChat(inner, true); 
                         else if (inner.type === "GET_SONG") handleGetSong(inner.user);
+                        else if (inner.type === "WHEN_SONG") handleWhenSong(inner.user);
+                        else if (inner.type === "QUEUE_SONGS") handleQueueSongs(inner.user);
                         else if (inner.type === "SKIP_SONG") handleSkipSong(inner.user);
                         else if (inner.type === "VOTE_SKIP") handleVoteSkip(inner.user);
                         else if (inner.type === "WRONG_SONG") handleWrongSong(inner.user);

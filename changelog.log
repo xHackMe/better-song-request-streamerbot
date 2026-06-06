@@ -1,5 +1,22 @@
+Release v1.3.0
+📜 Changelog 06.06.2026
+
+NEW Added a fully customizable OBS widget layout editor with interactive moving, resizing, rotating, hiding, element opacity, and background opacity controls.
+NEW Added !when to show when the requesting viewer's nearest queued song will play.
+NEW Added !queue to show the current request/manual song plus the next 10 request/manual song titles.
+CHANGE Moved the OBS widget URL and resolution reminder into the right side of the widget editor header.
+CHANGE Moved the OBS source size reminder under the widget editor preview size controls.
+CHANGE Opening the widget editor now publishes the DEMO song state to all widget sources until the editor is closed, preventing live-song/demo flicker.
+CHANGE Saving or resetting the widget layout now applies the change without closing the widget editor.
+CHANGE Settings backup now includes the saved custom widget layout.
+CHANGE Updated page version to v1.3.0. Streamer.bot import is v1.0.4.
+FIX DEMO widget publishing now keeps the live editor draft layout instead of replacing it with the previously saved layout during editing.
+FIX Removed unintended background blocks from edited title, artist, time, and waveform elements when their background opacity is set to 0.
+FIX Matched the edited source/requester badge styling with the original OBS widget badge.
+FIX Centered the widget preset delete icons inside their buttons.
+
 Release v1.2.4
-Changelog 31.05.2026
+📜 Changelog 31.05.2026
 
 NEW Added viewer request history between Clear queue and Save queue, with unique chat-requested songs, search, user/date filters, favorite support, and quick add back to queue.
 NEW Added a top brand bar with favicon and the project name.
