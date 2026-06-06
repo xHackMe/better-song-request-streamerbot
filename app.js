@@ -1247,7 +1247,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         // =========================================================================
         const PROJECT_NAME = "Better Song Request";
         const CURRENT_VERSION = "v1.3.0";
-        const GITHUB_REPO = "xHackMe/ytm-song-request-streamerbot";
+        const GITHUB_REPO = "xHackMe/better-song-request-streamerbot";
         const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.4";
         const STREAMERBOT_DIAGNOSTICS_ACTION = "YtmImportDiagnostics";
         const SETTINGS_BACKUP_TYPE = "BETTER_SONG_REQUEST_SETTINGS_BACKUP";
@@ -1326,101 +1326,147 @@ if (!WIDGET_EDITOR_PREVIEW) {
             updateBtn.innerText = t('ui_test_version');
             updateBtn.onclick = null;
         }
+
+        function normalizeVersionTag(version) {
+            return String(version || '').trim().toLowerCase().replace(/^v/, '');
+        }
+
+        function getGithubReleaseUrl(tagName) {
+            return `https://github.com/${GITHUB_REPO}/releases/tag/${encodeURIComponent(tagName)}`;
+        }
+
+        function renderGithubChangelogMessage(message, isError = false) {
+            const clContent = document.getElementById('changelog-content');
+            if (!clContent) return;
+            clContent.innerHTML = '<div class="' + (isError ? 'ex-style-066' : 'ex-style-065') + '">' + escapeHtml(message) + '</div>';
+        }
+
+        async function fetchGithubJson(path) {
+            const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const timeout = controller ? setTimeout(() => controller.abort(), 12000) : null;
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}${path}`, {
+                    cache: 'no-store',
+                    headers: { 'Accept': 'application/vnd.github+json' },
+                    signal: controller ? controller.signal : undefined
+                });
+                if (!res.ok) {
+                    let detail = `${res.status} ${res.statusText}`.trim();
+                    try {
+                        const errorBody = await res.json();
+                        if (errorBody && errorBody.message) detail += ` - ${errorBody.message}`;
+                    } catch (error) {}
+                    throw new Error(detail || 'GitHub request failed');
+                }
+                return await res.json();
+            } finally {
+                if (timeout) clearTimeout(timeout);
+            }
+        }
+
+        function updateGithubVersionButton(latestTagName, latestUrl, localIsTestVersion) {
+            const updateBtn = document.getElementById('update-btn');
+            if (!updateBtn || !latestTagName) return;
+            if (localIsTestVersion) {
+                renderTestVersionBadge();
+                return;
+            }
+            const cleanLocalVer = normalizeVersionTag(CURRENT_VERSION);
+            const cleanGithubVer = normalizeVersionTag(latestTagName);
+            console.log(`[Update Check] Local: ${cleanLocalVer} | GitHub: ${cleanGithubVer}`);
+            if (cleanLocalVer !== cleanGithubVer) {
+                updateBtn.style.display = 'block';
+                updateBtn.removeAttribute('data-test-version');
+                updateBtn.setAttribute('data-version', latestTagName);
+                updateBtn.innerText = t('ui_update_btn', { version: latestTagName });
+                updateBtn.onclick = () => window.open(latestUrl || `https://github.com/${GITHUB_REPO}/releases`, '_blank');
+            } else {
+                updateBtn.style.display = 'none';
+            }
+        }
+
+        function formatGithubReleaseBody(bodyText) {
+            return (bodyText || "No release notes provided.").split('\n').map(line => {
+                let trimmed = escapeHtml(line.trim());
+                if (trimmed.length === 0) return "<br>";
+
+                let hasBadge = false;
+                trimmed = trimmed.replace(/^(NEW|FIX|CHANGE|CHG)\s/i, function(match, type) {
+                    hasBadge = true;
+                    let cssClass = "cl-chg";
+                    let tUpper = type.toUpperCase();
+                    if (tUpper === "NEW") cssClass = "cl-new";
+                    else if (tUpper === "FIX") cssClass = "cl-fix";
+                    return `<span class="cl-badge ${cssClass}">${tUpper}</span> `;
+                });
+
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    trimmed = trimmed.substring(2);
+                    hasBadge = true;
+                }
+
+                if (hasBadge) return `<li class="ex-style-062">${trimmed}</li>`;
+                return `<div>${trimmed}</div>`;
+            }).join('');
+        }
+
+        function renderGithubReleases(releases) {
+            const clContent = document.getElementById('changelog-content');
+            if (!clContent) return;
+            const cleanLocalVer = normalizeVersionTag(CURRENT_VERSION);
+            clContent.innerHTML = '';
+
+            releases.forEach(rel => {
+                const date = rel.published_at ? new Date(rel.published_at).toLocaleDateString() : '';
+                const cleanRelVer = normalizeVersionTag(rel.tag_name);
+                const isCurrent = (cleanRelVer === cleanLocalVer)
+                    ? '<span class="ex-style-061">(Your Version)</span>'
+                    : '';
+                const releaseTitle = escapeHtml(rel.name || rel.tag_name || 'Release');
+                const releaseUrl = escapeHtml(rel.html_url || `https://github.com/${GITHUB_REPO}/releases`);
+                const formattedBody = formatGithubReleaseBody(rel.body);
+
+                clContent.innerHTML += `
+                    <div class="changelog-entry">
+                        <h4 class="cl-version">
+                            <a href="${releaseUrl}" target="_blank" title="View this release on GitHub" class="ex-style-063">
+                                ${releaseTitle}
+                            </a>
+                            ${isCurrent}
+                            <span class="cl-date">${escapeHtml(date)}</span>
+                        </h4>
+                        <div class="cl-body"><ul class="ex-style-064">${formattedBody}</ul></div>
+                    </div>
+                `;
+            });
+        }
         
         async function checkGithubUpdates() {
             const localIsTestVersion = isTestVersion(CURRENT_VERSION);
             if (localIsTestVersion) renderTestVersionBadge();
 
             try {
-                // Use 'no-store' to always fetch fresh data and bypass the browser cache.
-                let res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`, {
-                    cache: 'no-store',
-                    headers: { 'Accept': 'application/vnd.github.v3+json' }
-                });
-                
-                if (!res.ok) return;
-                let releases = await res.json();
-                
-                if (releases && releases.length > 0) {
-                    let latest = releases[0];
-                    
-                    // Compare versions safely by trimming spaces, lowercasing, and removing the leading "v".
-                    let cleanLocalVer = CURRENT_VERSION.trim().toLowerCase().replace(/^v/, '');
-                    let cleanGithubVer = latest.tag_name.trim().toLowerCase().replace(/^v/, '');
-                    
-                    console.log(`[Update Check] Local: ${cleanLocalVer} | GitHub: ${cleanGithubVer}`);
+                const releases = await fetchGithubJson('/releases');
 
-                    // 1. Update button logic
-                    if (localIsTestVersion) {
-                        renderTestVersionBadge();
-                    } else if (cleanLocalVer !== cleanGithubVer) {
-                        const updateBtn = document.getElementById('update-btn');
-                        updateBtn.style.display = 'block';
-                        updateBtn.removeAttribute('data-test-version');
-                        updateBtn.setAttribute('data-version', latest.tag_name); 
-                        updateBtn.innerText = t('ui_update_btn', {version: latest.tag_name});
-                        updateBtn.onclick = () => window.open(latest.html_url, '_blank');
-                    } else {
-                        document.getElementById('update-btn').style.display = 'none';
-                    }
+                if (Array.isArray(releases) && releases.length > 0) {
+                    updateGithubVersionButton(releases[0].tag_name, releases[0].html_url, localIsTestVersion);
+                    renderGithubReleases(releases);
+                    return;
+                }
 
-                    // 2. Changelog rendering
-                    const clContent = document.getElementById('changelog-content');
-                    clContent.innerHTML = '';
-                    
-                    releases.forEach(rel => {
-                        let date = new Date(rel.published_at).toLocaleDateString();
-                        
-                        // Compare each changelog entry against the current version safely.
-                        let cleanRelVer = rel.tag_name.trim().toLowerCase().replace(/^v/, '');
-                        let isCurrent = (cleanRelVer === cleanLocalVer) 
-                            ? '<span class="ex-style-061">(Your Version)</span>' 
-                            : '';
-                        
-                        let bodyText = rel.body || "No release notes provided.";
-                        
-                        let formattedBody = bodyText.split('\n').map(line => {
-                            let trimmed = line.trim();
-                            if(trimmed.length === 0) return "<br>";
-                            
-                            let hasBadge = false;
-                            trimmed = trimmed.replace(/^(NEW|FIX|CHANGE|CHG)\s/i, function(match, type) {
-                                hasBadge = true;
-                                let cssClass = "cl-chg";
-                                let tUpper = type.toUpperCase();
-                                if(tUpper === "NEW") cssClass = "cl-new";
-                                else if (tUpper === "FIX") cssClass = "cl-fix";
-                                return `<span class="cl-badge ${cssClass}">${tUpper}</span> `;
-                            });
-
-                            if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                                trimmed = trimmed.substring(2);
-                                hasBadge = true;
-                            }
-
-                            if(hasBadge) return `<li class="ex-style-062">${trimmed}</li>`;
-                            return `<div>${trimmed}</div>`;
-                        }).join('');
-
-                        clContent.innerHTML += `
-                            <div class="changelog-entry">
-                                <h4 class="cl-version">
-                                    <a href="${rel.html_url}" target="_blank" title="View this release on GitHub" class="ex-style-063">
-                                        ${rel.name || rel.tag_name}
-                                    </a> 
-                                    ${isCurrent} 
-                                    <span class="cl-date">${date}</span>
-                                </h4>
-                                <div class="cl-body"><ul class="ex-style-064">${formattedBody}</ul></div>
-                            </div>
-                        `;
-                    });
+                const tags = await fetchGithubJson('/tags');
+                const latestTag = Array.isArray(tags) && tags.length > 0 ? tags[0].name : '';
+                if (latestTag) {
+                    updateGithubVersionButton(latestTag, getGithubReleaseUrl(latestTag), localIsTestVersion);
+                    renderGithubChangelogMessage('No releases found on GitHub. Version was checked using repository tags.');
                 } else {
-                    document.getElementById('changelog-content').innerHTML = '<div class="ex-style-065">No releases found on GitHub.</div>';
+                    const updateBtn = document.getElementById('update-btn');
+                    if (updateBtn && !localIsTestVersion) updateBtn.style.display = 'none';
+                    renderGithubChangelogMessage('No releases or tags found on GitHub.');
                 }
             } catch(e) {
                 console.error("GitHub API Error:", e);
-                document.getElementById('changelog-content').innerHTML = '<div class="ex-style-066">Error loading changelog from GitHub.</div>';
+                renderGithubChangelogMessage(`Error loading GitHub data for ${GITHUB_REPO}: ${e.message || e}`, true);
             }
         }
 
@@ -2047,7 +2093,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const url = new URL('now-playing-widget.html', window.location.href);
             url.searchParams.set('editor', '1');
             url.searchParams.set('lang', currentLang || 'en');
-            url.searchParams.set('v', '20260606-125R35');
+            url.searchParams.set('v', '20260606-125R37');
             return url.toString();
         }
 

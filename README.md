@@ -34,7 +34,7 @@ Türkçe
 
 ### Step 1: Download the files
 Download the latest `index.html`, `now-playing-widget.html`, `style.css`, `app.js` and `translations.js` or `Source code
-(zip)` from the [Releases](https://github.com/xHackMe/ytm-song-request-streamerbot/releases) tab and save them in a dedicated folder on your PC (e.g., `C:\StreamerBot\Better Song Request\`).
+(zip)` from the [Releases](https://github.com/xHackMe/better-song-request-streamerbot/releases) tab and save them in a dedicated folder on your PC (e.g., `C:\StreamerBot\Better Song Request\`).
 
 ### Step 2: Streamer.bot HTTP Server
 The file needs to be hosted locally to bypass browser restrictions and communicate with the API properly.
