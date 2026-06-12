@@ -1,3 +1,9 @@
+Release v1.3.1
+📜 Changelog 12.06.2026
+
+NEW Added Twitch/Kick/YouTube chat source routing for Streamer.bot commands so multi-stream replies return to the platform that sent the command.
+CHANGE Updated the Streamer.bot import package to v1.0.6.
+
 Release v1.3.0
 📜 Changelog 06.06.2026
 

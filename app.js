@@ -1246,9 +1246,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
         // PROJECT VERSION AND GITHUB DATA
         // =========================================================================
         const PROJECT_NAME = "Better Song Request";
-        const CURRENT_VERSION = "v1.3.0";
+        const CURRENT_VERSION = "v1.3.1";
         const GITHUB_REPO = "xHackMe/better-song-request-streamerbot";
-        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.4";
+        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.6";
         const STREAMERBOT_DIAGNOSTICS_ACTION = "YtmImportDiagnostics";
         const SETTINGS_BACKUP_TYPE = "BETTER_SONG_REQUEST_SETTINGS_BACKUP";
         const LEGACY_SETTINGS_BACKUP_TYPES = ["YTM_SONG_REQUEST_SETTINGS_BACKUP"];
@@ -1259,7 +1259,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
             { key: 'NOW_PLAYING_WIDGET_STATE', label: 'NowPlayingWidgetState' },
             { key: 'VOTE_SKIP', label: 'SongVoteSkip / !voteskip' },
             { key: 'WHEN_SONG', label: 'SongWhen / !when' },
-            { key: 'QUEUE_SONGS', label: 'SongQueue / !queue' }
+            { key: 'QUEUE_SONGS', label: 'SongQueue / !queue' },
+            { key: 'MULTI_CHAT_SOURCE', label: 'Twitch/Kick/YouTube replies' }
         ];
         const REQUIRED_IMPORT_COMPONENTS = {
             actions: [
@@ -1737,6 +1738,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         let playQueue = [];     
         let playHistory = [];   
         let currentSongInfo = null; 
+        let activeChatReplyTarget = null;
         let currentSongStopped = false;
         let nowPlayingWaveEffect = '';
         let nowPlayingWaveEffectUntil = 0;
@@ -2093,7 +2095,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const url = new URL('now-playing-widget.html', window.location.href);
             url.searchParams.set('editor', '1');
             url.searchParams.set('lang', currentLang || 'en');
-            url.searchParams.set('v', '20260606-125R37');
+            url.searchParams.set('v', '20260612-131R03');
             return url.toString();
         }
 
@@ -3599,14 +3601,55 @@ if (!WIDGET_EDITOR_PREVIEW) {
             return [...new Set(vars)].join(' ');
         }
 
+        function normalizeChatSource(source, fallback = '') {
+            const value = String(source || '').trim().toLowerCase();
+            if (value === 'all' || value === '*') return 'all';
+            if (value === 'youtube' || value === 'yt' || value.includes('youtube')) return 'youtube';
+            if (value === 'kick' || value.includes('kick')) return 'kick';
+            if (value === 'twitch' || value.includes('twitch')) return 'twitch';
+            return fallback;
+        }
+
+        function normalizeChatTarget(target) {
+            if (!target) return null;
+            const chatSource = normalizeChatSource(target.chatSource || target.source || target.platform || target.eventSource, '');
+            const youtubeBroadcastId = String(target.youtubeBroadcastId || target.broadcastId || target.youTubeBroadcastId || '').trim();
+            if (!chatSource && !youtubeBroadcastId) return null;
+            return {
+                chatSource: chatSource || 'twitch',
+                youtubeBroadcastId
+            };
+        }
+
+        function getPayloadChatTarget(payload) {
+            return normalizeChatTarget(payload);
+        }
+
+        function getSongChatTarget(song) {
+            return normalizeChatTarget(song);
+        }
+
+        function attachChatTargetToSong(song, target = activeChatReplyTarget) {
+            const chatTarget = normalizeChatTarget(song) || normalizeChatTarget(target);
+            if (!chatTarget) return song;
+            return {
+                ...song,
+                chatSource: chatTarget.chatSource,
+                youtubeBroadcastId: chatTarget.youtubeBroadcastId || ''
+            };
+        }
+
         function normalizeSongForStorage(song) {
             if (!song || !song.id) return null;
+            const chatTarget = normalizeChatTarget(song);
             return {
                 id: song.id,
                 title: song.title || 'Unknown Title',
                 author: song.author || 'Unknown Author',
                 user: song.user || 'Auto',
-                duration: normalizePositiveInteger(song.duration, 210)
+                duration: normalizePositiveInteger(song.duration, 210),
+                chatSource: chatTarget ? chatTarget.chatSource : '',
+                youtubeBroadcastId: chatTarget ? chatTarget.youtubeBroadcastId : ''
             };
         }
 
@@ -4716,7 +4759,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 localStorage.setItem('ytm_banned_songs', JSON.stringify(bannedSongs)); 
                 log(`🔨 Banned current: ${currentSongInfo.title}`, "warn");
                 if (currentSongInfo.user !== "Streamer" && currentSongInfo.user !== "Auto") {
-                    sendChatMessage(t('msg_ban_auto', {title: currentSongInfo.title}));
+                    sendChatMessage(t('msg_ban_auto', {title: currentSongInfo.title}), getSongChatTarget(currentSongInfo));
                 }
             }
             skipSong(); 
@@ -4729,7 +4772,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 localStorage.setItem('ytm_banned_songs', JSON.stringify(bannedSongs)); 
                 log(`🔨 Banned: ${song.title}`, "warn");
                 if (song.user !== "Streamer" && song.user !== "Auto") {
-                    sendChatMessage(t('msg_ban_rm', {title: song.title}));
+                    sendChatMessage(t('msg_ban_rm', {title: song.title}), getSongChatTarget(song));
                 }
             }
             removeSongFromUI(index);
@@ -5182,7 +5225,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             document.getElementById('now-playing-title').innerText = t('ui_error_skip');
             
             setTimeout(() => {
-                if (currentSongInfo && currentSongInfo.user !== "Auto") sendChatMessage(t('msg_bot_blocked', {user: currentSongInfo.user}));
+                if (currentSongInfo && currentSongInfo.user !== "Auto") sendChatMessage(t('msg_bot_blocked', {user: currentSongInfo.user}), getSongChatTarget(currentSongInfo));
                 playNext();
             }, 3000);
         }
@@ -5617,6 +5660,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function addSongFromChat(songObj, force = false) {
+            songObj = attachChatTargetToSong(songObj);
             if(songObj.author) songObj.author = cleanAuthorName(songObj.author);
             if (!force && songObj.user !== "Streamer" && songObj.duration && songObj.duration > SR_MAX_DURATION_MINUTES * 60) {
                 sendChatMessage(t('msg_err_long', {user: songObj.user, info: Math.ceil(songObj.duration / 60), limit: SR_MAX_DURATION_MINUTES}));
@@ -5668,7 +5712,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function sendChatMessage(msg) {
             if (!msg || !String(msg).trim()) return;
             if(canUseStreamerBotWebsocket()) {
-                ws.send(JSON.stringify({"request": "DoAction", "action": { "name": "ChatMessage" }, "args": { "message": msg }, "id": "MsgOut" }));
+                const args = { message: String(msg), chatSource: 'all' };
+                ws.send(JSON.stringify({"request": "DoAction", "action": { "name": "ChatMessage" }, "args": args, "id": "MsgOut" }));
             }
         }
 
@@ -6151,59 +6196,65 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     else if (raw.type) inner = raw;
 
                     if (inner) {
-                        if (inner.type === "IMPORT_DIAGNOSTICS") {
-                            handleImportDiagnosticsPayload(inner);
-                        }
-                        else if (inner.type === "SONG_REQUEST") {
-                            if (!isSrEnabled) sendChatMessage(t('msg_sr_disabled', {user: inner.user}));
-                            else if (bannedSongs.some(b => b.id === inner.id)) sendChatMessage(t('msg_sr_banned', {user: inner.user}));
-                            else {
-                                let isDuplicate = playQueue.some(song => song.id === inner.id && song.user !== "Auto" && song.user !== "Streamer");
-                                let isCurrentDuplicate = currentSongInfo && currentSongInfo.id === inner.id && currentSongInfo.user !== "Auto" && currentSongInfo.user !== "Streamer";
-                                if (isDuplicate || isCurrentDuplicate) sendChatMessage(t('msg_sr_dupe', {user: inner.user}));
-                                else addSongFromChat(inner);
+                        const previousChatReplyTarget = activeChatReplyTarget;
+                        activeChatReplyTarget = getPayloadChatTarget(inner);
+                        try {
+                            if (inner.type === "IMPORT_DIAGNOSTICS") {
+                                handleImportDiagnosticsPayload(inner);
                             }
-                        }
-                        else if (inner.type === "SONG_REQUEST_FORCE") addSongFromChat(inner, true); 
-                        else if (inner.type === "GET_SONG") handleGetSong(inner.user);
-                        else if (inner.type === "WHEN_SONG") handleWhenSong(inner.user);
-                        else if (inner.type === "QUEUE_SONGS") handleQueueSongs(inner.user);
-                        else if (inner.type === "SKIP_SONG") handleSkipSong(inner.user);
-                        else if (inner.type === "VOTE_SKIP") handleVoteSkip(inner.user);
-                        else if (inner.type === "WRONG_SONG") handleWrongSong(inner.user);
-                        else if (inner.type === "VOLUME") handleVolume(inner);
-                        
-                        else if (inner.type === "PLAY_SONG") playFromChat(inner.user);
-                        else if (inner.type === "PAUSE_SONG") pauseFromChat(inner.user);
-                        else if (inner.type === "STOP_SONG") stopFromChat(inner.user);
+                            else if (inner.type === "SONG_REQUEST") {
+                                if (!isSrEnabled) sendChatMessage(t('msg_sr_disabled', {user: inner.user}));
+                                else if (bannedSongs.some(b => b.id === inner.id)) sendChatMessage(t('msg_sr_banned', {user: inner.user}));
+                                else {
+                                    let isDuplicate = playQueue.some(song => song.id === inner.id && song.user !== "Auto" && song.user !== "Streamer");
+                                    let isCurrentDuplicate = currentSongInfo && currentSongInfo.id === inner.id && currentSongInfo.user !== "Auto" && currentSongInfo.user !== "Streamer";
+                                    if (isDuplicate || isCurrentDuplicate) sendChatMessage(t('msg_sr_dupe', {user: inner.user}));
+                                    else addSongFromChat(inner);
+                                }
+                            }
+                            else if (inner.type === "SONG_REQUEST_FORCE") addSongFromChat(inner, true); 
+                            else if (inner.type === "GET_SONG") handleGetSong(inner.user);
+                            else if (inner.type === "WHEN_SONG") handleWhenSong(inner.user);
+                            else if (inner.type === "QUEUE_SONGS") handleQueueSongs(inner.user);
+                            else if (inner.type === "SKIP_SONG") handleSkipSong(inner.user);
+                            else if (inner.type === "VOTE_SKIP") handleVoteSkip(inner.user);
+                            else if (inner.type === "WRONG_SONG") handleWrongSong(inner.user);
+                            else if (inner.type === "VOLUME") handleVolume(inner);
+                            
+                            else if (inner.type === "PLAY_SONG") playFromChat(inner.user);
+                            else if (inner.type === "PAUSE_SONG") pauseFromChat(inner.user);
+                            else if (inner.type === "STOP_SONG") stopFromChat(inner.user);
 
-                        else if (inner.type === "SR_ERROR") {
-                            let msg = "";
-                            switch(inner.errorCode) {
-                                case "EMPTY_INPUT": msg += t('msg_err_empty', {user: inner.user}); break;
-                                case "NOT_FOUND": msg += t('msg_err_not_found', {user: inner.user, info: inner.extraInfo}); break;
-                                case "TOO_LONG": msg += t('msg_err_long', {user: inner.user, info: Math.floor(parseInt(inner.extraInfo)/60), limit: SR_MAX_DURATION_MINUTES}); break;
-                                case "NOT_MUSIC": msg += t('msg_err_cat', {user: inner.user, info: inner.extraInfo}); break;
-                                case "USER_LIMIT": {
-                                    const [count, limit] = String(inner.extraInfo || '').split('|');
-                                    msg += t('msg_sr_user_limit', {user: inner.user, count: count || '?', limit: limit || SR_USER_QUEUE_LIMIT});
-                                    break;
+                            else if (inner.type === "SR_ERROR") {
+                                let msg = "";
+                                switch(inner.errorCode) {
+                                    case "EMPTY_INPUT": msg += t('msg_err_empty', {user: inner.user}); break;
+                                    case "NOT_FOUND": msg += t('msg_err_not_found', {user: inner.user, info: inner.extraInfo}); break;
+                                    case "TOO_LONG": msg += t('msg_err_long', {user: inner.user, info: Math.floor(parseInt(inner.extraInfo)/60), limit: SR_MAX_DURATION_MINUTES}); break;
+                                    case "NOT_MUSIC": msg += t('msg_err_cat', {user: inner.user, info: inner.extraInfo}); break;
+                                    case "USER_LIMIT": {
+                                        const [count, limit] = String(inner.extraInfo || '').split('|');
+                                        msg += t('msg_sr_user_limit', {user: inner.user, count: count || '?', limit: limit || SR_USER_QUEUE_LIMIT});
+                                        break;
+                                    }
+                                    case "GLOBAL_LIMIT": {
+                                        const [count, limit] = String(inner.extraInfo || '').split('|');
+                                        msg += t('msg_sr_global_limit', {user: inner.user, count: count || '?', limit: limit || SR_GLOBAL_QUEUE_LIMIT});
+                                        break;
+                                    }
+                                    case "API_ERROR": msg += t('msg_err_api', {user: inner.user}); break;
                                 }
-                                case "GLOBAL_LIMIT": {
-                                    const [count, limit] = String(inner.extraInfo || '').split('|');
-                                    msg += t('msg_sr_global_limit', {user: inner.user, count: count || '?', limit: limit || SR_GLOBAL_QUEUE_LIMIT});
-                                    break;
-                                }
-                                case "API_ERROR": msg += t('msg_err_api', {user: inner.user}); break;
+                                if (msg) sendChatMessage(msg);
                             }
-                            if (msg) sendChatMessage(msg);
-                        }
-                        else if (inner.type === "SR_SEARCHING") {
-                            sendChatMessage(t('msg_searching', {user: inner.user}));
-                        }
-                        else if (inner.type === "SR_FORCE_ERROR") {
-                            if(inner.errorCode === "INVALID_ID") sendChatMessage(t('msg_err_id', {user: inner.user}));
-                            else sendChatMessage(t('msg_err_yt_read', {user: inner.user}));
+                            else if (inner.type === "SR_SEARCHING") {
+                                sendChatMessage(t('msg_searching', {user: inner.user}));
+                            }
+                            else if (inner.type === "SR_FORCE_ERROR") {
+                                if(inner.errorCode === "INVALID_ID") sendChatMessage(t('msg_err_id', {user: inner.user}));
+                                else sendChatMessage(t('msg_err_yt_read', {user: inner.user}));
+                            }
+                        } finally {
+                            activeChatReplyTarget = previousChatReplyTarget;
                         }
                     }
                 } catch(err) {}
