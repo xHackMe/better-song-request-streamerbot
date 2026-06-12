@@ -6,6 +6,7 @@ Current Streamer.bot import version: `1.0.6` for page version `v1.3.1`.
 
 ## ✨ Key Features
 * **No Third-Party Services:** Runs entirely locally on Streamer.bot's HTTP and WebSocket servers. Your data and API keys stay on your machine.
+* **Multi-stream support:** Whether you stream on Twitch, Kick, or YouTube! Works equally independently and simultaneously!
 * **Drag & Drop Queue:** Easily manage viewer requests by dragging and dropping tracks to change their order in real-time.
 * **Base Playlists (Fallback):** Add your favorite YouTube playlists. If the viewer queue is empty, the player will automatically shuffle and play tracks from your base playlists.
 * **Blacklist / Ban System:** Ban troll songs with one click. Banned songs are instantly skipped and removed.
