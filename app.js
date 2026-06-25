@@ -1246,9 +1246,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
         // PROJECT VERSION AND GITHUB DATA
         // =========================================================================
         const PROJECT_NAME = "Better Song Request";
-        const CURRENT_VERSION = "v1.3.1";
+        const CURRENT_VERSION = "v1.4.0";
         const GITHUB_REPO = "xHackMe/better-song-request-streamerbot";
-        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.6";
+        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.10";
         const STREAMERBOT_DIAGNOSTICS_ACTION = "YtmImportDiagnostics";
         const SETTINGS_BACKUP_TYPE = "BETTER_SONG_REQUEST_SETTINGS_BACKUP";
         const LEGACY_SETTINGS_BACKUP_TYPES = ["YTM_SONG_REQUEST_SETTINGS_BACKUP"];
@@ -1260,6 +1260,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
             { key: 'VOTE_SKIP', label: 'SongVoteSkip / !voteskip' },
             { key: 'WHEN_SONG', label: 'SongWhen / !when' },
             { key: 'QUEUE_SONGS', label: 'SongQueue / !queue' },
+            { key: 'CHANNEL_POINT_REWARD_TRIGGER', label: 'Twitch channel point reward trigger' },
+            { key: 'KICK_CHANNEL_REWARD_TRIGGER', label: 'Kick channel reward trigger' },
             { key: 'MULTI_CHAT_SOURCE', label: 'Twitch/Kick/YouTube replies' }
         ];
         const REQUIRED_IMPORT_COMPONENTS = {
@@ -2095,7 +2097,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const url = new URL('now-playing-widget.html', window.location.href);
             url.searchParams.set('editor', '1');
             url.searchParams.set('lang', currentLang || 'en');
-            url.searchParams.set('v', '20260612-131R03');
+            url.searchParams.set('v', '20260626-140R04');
             return url.toString();
         }
 
@@ -4320,6 +4322,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     globalQueueLimit: SR_GLOBAL_QUEUE_LIMIT.toString(),
                     userLimitEnabled: limitState.userLimitEnabled,
                     globalLimitEnabled: limitState.globalLimitEnabled,
+                    srEnabled: isSrEnabled ? 'true' : 'false',
                     globalRequestCount: limitState.globalRequestCount,
                     userRequestCountsJson: limitState.userRequestCountsJson,
                     requireMusicCategory: SR_REQUIRE_MUSIC_CATEGORY ? 'true' : 'false'
@@ -5205,6 +5208,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 if(!skipMsg) sendChatMessage(t('msg_sr_off'));
             }
             if(!skipMsg) log(`SR Toggle: ${isSrEnabled}`, "warn");
+            syncSongRequestSettingsToStreamerBot();
         }
 
         var tag = document.createElement('script');
@@ -6229,6 +6233,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                                 let msg = "";
                                 switch(inner.errorCode) {
                                     case "EMPTY_INPUT": msg += t('msg_err_empty', {user: inner.user}); break;
+                                    case "SR_DISABLED": msg += t('msg_sr_disabled', {user: inner.user}); break;
                                     case "NOT_FOUND": msg += t('msg_err_not_found', {user: inner.user, info: inner.extraInfo}); break;
                                     case "TOO_LONG": msg += t('msg_err_long', {user: inner.user, info: Math.floor(parseInt(inner.extraInfo)/60), limit: SR_MAX_DURATION_MINUTES}); break;
                                     case "NOT_MUSIC": msg += t('msg_err_cat', {user: inner.user, info: inner.extraInfo}); break;

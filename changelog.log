@@ -1,3 +1,14 @@
+Release v1.4.0
+Changelog 26.06.2026
+
+NEW Added a blank Twitch Channel Point Reward trigger to the Streamer.bot SongRequest action so a reward can be assigned to submit a YouTube link or song title.
+NEW Added a blank Kick Channel Reward trigger to the Streamer.bot SongRequest action for Kick reward-based song requests.
+CHANGE SongRequest now checks whether !SR is enabled before searching YouTube, so disabled requests stop immediately.
+CHANGE Blank Twitch and Kick reward triggers are now disabled by default so they do not catch every reward before being configured.
+CHANGE Updated page version to v1.4.0.
+CHANGE Updated the Streamer.bot import package to v1.0.10.
+FIX Channel point redemptions without text no longer send an empty-request error to chat when the blank reward trigger is still unconfigured.
+
 Release v1.3.1
 📜 Changelog 12.06.2026
 
