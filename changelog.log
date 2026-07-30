@@ -1,5 +1,23 @@
+Release v2.0.0
+📜 Changelog 30.07.2026
+
+NEW Added Spotify integration using OAuth, Spotify Web Playback SDK, and Spotify Premium playback.
+NEW Added Spotify playlist support in the base playlist manager.
+NEW Added Spotify track link support for !sr through the Streamer.bot import.
+NEW Added source badges so songs show whether they come from YouTube or Spotify.
+NEW Added YouTube fallback for Spotify requests when native Spotify playback is unavailable.
+NEW Added an editable !SR status badge to the OBS widget and widget editor.
+NEW Added a variable to store the player's volume setting.
+CHANGE Redesigned the OBS widget as a minimal 600x180 retro strip with cover-based color accents..
+CHANGE Rebuilt the main interface into a full retro poster-inspired layout with paper panels, bold ink borders, rainbow rails, record-sleeve track cards, and hover-revealed metadata strips.
+CHANGE Replaced the page favicon with the supplied project logo scaled to a 64x64 embedded PNG base64 favicon.
+CHANGE Added a day/night theme toggle in the top bar and made the night theme the default.
+CHANGE Updated the Streamer.bot import package to v1.1.0.
+FIX Strengthened dark-theme text contrast across settings, modals, widget editor, footer, and song cards.
+FIX Improved right-panel now-playing progress placement and text contrast in both light and dark themes.
+
 Release v1.4.0
-Changelog 26.06.2026
+📜 Changelog 26.06.2026
 
 NEW Added a blank Twitch Channel Point Reward trigger to the Streamer.bot SongRequest action so a reward can be assigned to submit a YouTube link or song title.
 NEW Added a blank Kick Channel Reward trigger to the Streamer.bot SongRequest action for Kick reward-based song requests.

@@ -39,33 +39,36 @@ const WIDGET_EDITOR_PREVIEW_WIDTH_STORAGE_KEY = 'ytm_widget_editor_preview_width
 const WIDGET_EDITOR_PREVIEW_HEIGHT_STORAGE_KEY = 'ytm_widget_editor_preview_height';
 const WIDGET_EDITOR_PREVIEW_MODE_STORAGE_KEY = 'ytm_widget_editor_preview_mode';
 const WIDGET_EDITOR_PREVIEW_PRESETS = {
-    default: { width: 500, height: 200 },
+    default: { width: 600, height: 180 },
     square: { width: 500, height: 500 },
     portrait: { width: 225, height: 400 }
 };
-const WIDGET_LAYOUT_ELEMENT_KEYS = ['cover', 'infoBackground', 'title', 'author', 'requester', 'meterBackground', 'currentTime', 'waveform', 'duration', 'progress'];
-const WIDGET_LAYOUT_OBJECT_COLOR_KEYS = new Set(['infoBackground', 'meterBackground', 'requester', 'waveform', 'progress']);
-const WIDGET_LAYOUT_TEXT_KEYS = new Set(['title', 'author', 'requester', 'currentTime', 'duration']);
+const WIDGET_LAYOUT_ELEMENT_KEYS = ['cover', 'infoBackground', 'title', 'author', 'requester', 'srStatus', 'meterBackground', 'currentTime', 'waveform', 'duration', 'progress'];
+const WIDGET_LAYOUT_OBJECT_COLOR_KEYS = new Set(['infoBackground', 'meterBackground', 'requester', 'srStatus', 'waveform', 'progress']);
+const WIDGET_LAYOUT_TEXT_KEYS = new Set(['title', 'author', 'requester', 'srStatus', 'currentTime', 'duration']);
+const WIDGET_LAYOUT_AUTO_FIT_TEXT_KEYS = new Set(['requester', 'srStatus']);
 const WIDGET_LAYOUT_TEXT_DEFAULTS = {
-    title: { color: '#b7c6d6', align: 'left' },
-    author: { color: '#97a9bb', align: 'left' },
-    requester: { color: '#eef4fb', align: 'center' },
-    currentTime: { color: '#b7c6d6', align: 'center' },
-    duration: { color: '#b7c6d6', align: 'center' }
+    title: { color: '#fff4dd', align: 'left' },
+    author: { color: '#a9b8b7', align: 'left' },
+    requester: { color: '#fff4dd', align: 'center' },
+    srStatus: { color: '#121516', align: 'center' },
+    currentTime: { color: '#fff4dd', align: 'center' },
+    duration: { color: '#fff4dd', align: 'center' }
 };
-const WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR = '#4f6275';
-const DEFAULT_WIDGET_LAYOUT_ORDER = ['cover', 'requester', 'title', 'author', 'currentTime', 'waveform', 'duration', 'progress', 'meterBackground', 'infoBackground'];
+const WIDGET_LAYOUT_DEFAULT_OBJECT_COLOR = '#43b9a8';
+const DEFAULT_WIDGET_LAYOUT_ORDER = ['cover', 'requester', 'srStatus', 'title', 'author', 'currentTime', 'waveform', 'duration', 'progress', 'meterBackground', 'infoBackground'];
 const DEFAULT_WIDGET_LAYOUT_ELEMENTS = {
-    cover: { x: 1.25, y: 3, width: 28.3, height: 68, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    infoBackground: { x: 31.2, y: 3, width: 67.5, height: 68, rotation: 0, opacity: 1, backgroundOpacity: 0.5, visible: true },
-    title: { x: 32.6, y: 23.4, width: 64.8, height: 21, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    author: { x: 32.6, y: 45.5, width: 64.8, height: 5.2, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    requester: { x: 88.9, y: 3, width: 9.8, height: 7.8, rotation: 0, opacity: 1, backgroundOpacity: 0.76, visible: true },
-    meterBackground: { x: 1.25, y: 75, width: 97.5, height: 16.5, rotation: 0, opacity: 1, backgroundOpacity: 0.5, visible: true },
-    currentTime: { x: 2.6, y: 79, width: 11, height: 8.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    waveform: { x: 15.3, y: 78, width: 69.5, height: 10.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    duration: { x: 86.4, y: 79, width: 11, height: 8.5, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
-    progress: { x: 1.25, y: 94.7, width: 97.5, height: 2.3, rotation: 0, opacity: 1, backgroundOpacity: 0.22, visible: true }
+    cover: { x: 1.67, y: 5.56, width: 25, height: 83.33, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    infoBackground: { x: 28.33, y: 5.56, width: 70, height: 56.67, rotation: 0, opacity: 1, backgroundOpacity: 0.92, visible: true },
+    title: { x: 31.33, y: 16.67, width: 51.5, height: 17.78, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    author: { x: 31.33, y: 39.44, width: 36, height: 10.56, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    requester: { x: 70.5, y: 37.22, width: 26, height: 16.67, rotation: 0, opacity: 1, backgroundOpacity: 1, visible: true },
+    srStatus: { x: 84.33, y: 8.33, width: 12.17, height: 17.78, rotation: 0, opacity: 1, backgroundOpacity: 1, visible: true },
+    meterBackground: { x: 28.33, y: 63.33, width: 70, height: 18.89, rotation: 0, opacity: 1, backgroundOpacity: 0.92, visible: true },
+    currentTime: { x: 30, y: 67.22, width: 10, height: 10, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    waveform: { x: 41, y: 66.67, width: 44.5, height: 11.11, rotation: 0, opacity: 1, backgroundOpacity: 0, colorMode: 'custom', color: '#ffffff', visible: true },
+    duration: { x: 87, y: 67.22, width: 9.5, height: 10, rotation: 0, opacity: 1, backgroundOpacity: 0, visible: true },
+    progress: { x: 28.33, y: 85, width: 70, height: 3.89, rotation: 0, opacity: 1, backgroundOpacity: 0.28, visible: true }
 };
 const WIDGET_LAYOUT_BACKGROUND_KEYS = new Set(['infoBackground', 'meterBackground']);
 
@@ -123,7 +126,7 @@ function normalizeWidgetTextAlign(value, fallback = 'left') {
 }
 
 function getWidgetTextDefault(key) {
-    return WIDGET_LAYOUT_TEXT_DEFAULTS[key] || { color: '#b7c6d6', align: 'center' };
+    return WIDGET_LAYOUT_TEXT_DEFAULTS[key] || { color: '#121516', align: 'center' };
 }
 
 function getWidgetTextJustifyContent(align) {
@@ -213,6 +216,9 @@ function normalizeWidgetLayoutConfig(value) {
             textColorMode: source.textColorMode === 'custom' ? 'custom' : 'auto',
             textColor: normalizeWidgetHexColor(source.textColor, textDefault.color),
             textAlign: normalizeWidgetTextAlign(source.textAlign, textDefault.align),
+            fontSize: isWidgetLayoutTextElement(key) && !WIDGET_LAYOUT_AUTO_FIT_TEXT_KEYS.has(key)
+                ? clampWidgetLayoutNumber(source.fontSize, 0, 100, 0)
+                : 0,
             visible: source.visible !== false
         };
     });
@@ -240,8 +246,9 @@ function writeWidgetLayoutConfig(config) {
 
 function clearWidgetLayoutElementStyles(element) {
     if (!element) return;
-    element.classList.remove('is-widget-element-hidden', 'is-widget-element-outside', 'is-widget-custom-color');
+    element.classList.remove('is-widget-element-hidden', 'is-widget-element-outside', 'is-widget-custom-color', 'is-widget-custom-text-color');
     element.removeAttribute('data-base-font-size');
+    element.removeAttribute('data-widget-font-size-ratio');
     ['left', 'top', 'width', 'height', 'transform', 'opacity', 'z-index', 'font-size', 'color', 'text-align', 'justify-content', 'justify-items', '--widget-element-bg-opacity', '--widget-element-scale', '--widget-element-rgb']
         .forEach(property => element.style.removeProperty(property));
 }
@@ -266,25 +273,58 @@ function fitWidgetOriginalCardText(card) {
     fitWidgetOriginalTextElement(card.querySelector('.np-card-author'), 0.68);
 }
 
+function getWidgetComputedBackgroundOpacity(value, fallback) {
+    const color = String(value || '').trim().toLowerCase();
+    if (!color || color === 'transparent') return color === 'transparent' ? 0 : fallback;
+    const match = color.match(/^rgba?\((.+)\)$/);
+    if (!match) return fallback;
+    const parts = match[1].split(/[\s,\/]+/).filter(Boolean);
+    if (parts.length < 4) return 1;
+    return clampWidgetLayoutNumber(parts[3], 0, 1, fallback);
+}
+
 function measureWidgetLayoutFromCard(card) {
     if (!card) return createDefaultWidgetLayoutConfig();
     const cardRect = card.getBoundingClientRect();
     if (!cardRect.width || !cardRect.height) return createDefaultWidgetLayoutConfig();
     const measured = createDefaultWidgetLayoutConfig();
+    const contentBoxTextKeys = new Set(['title', 'author', 'currentTime', 'duration']);
 
     WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
         let element = card.querySelector('[data-widget-element="' + key + '"]');
-        if (key === 'infoBackground') element = card.querySelector('.np-card-info');
-        if (key === 'meterBackground') element = card.querySelector('.np-card-meter');
+        if (!card.classList.contains('has-custom-layout') && key === 'infoBackground') element = card.querySelector('.np-card-info');
+        if (!card.classList.contains('has-custom-layout') && key === 'meterBackground') element = card.querySelector('.np-card-meter');
         if (!element) return;
         const rect = element.getBoundingClientRect();
+        const computed = getComputedStyle(element);
         const fallback = DEFAULT_WIDGET_LAYOUT_ELEMENTS[key];
+        const useContentBox = contentBoxTextKeys.has(key);
+        const paddingLeft = useContentBox ? (parseFloat(computed.paddingLeft) || 0) : 0;
+        const paddingRight = useContentBox ? (parseFloat(computed.paddingRight) || 0) : 0;
+        const paddingTop = useContentBox ? (parseFloat(computed.paddingTop) || 0) : 0;
+        const paddingBottom = useContentBox ? (parseFloat(computed.paddingBottom) || 0) : 0;
+        const textDefault = getWidgetTextDefault(key);
+        const computedTextAlign = computed.textAlign === 'start' ? 'left' : computed.textAlign;
+        const computedOpacity = parseFloat(computed.opacity);
+        const fontSize = isWidgetLayoutTextElement(key)
+            ? ((parseFloat(computed.fontSize) || 0) / cardRect.height) * 100
+            : 0;
         measured.elements[key] = {
             ...fallback,
-            x: ((rect.left - cardRect.left) / cardRect.width) * 100,
-            y: ((rect.top - cardRect.top) / cardRect.height) * 100,
-            width: (rect.width / cardRect.width) * 100,
-            height: (rect.height / cardRect.height) * 100
+            x: ((rect.left + paddingLeft - cardRect.left) / cardRect.width) * 100,
+            y: ((rect.top + paddingTop - cardRect.top) / cardRect.height) * 100,
+            width: (Math.max(1, rect.width - paddingLeft - paddingRight) / cardRect.width) * 100,
+            height: (Math.max(1, rect.height - paddingTop - paddingBottom) / cardRect.height) * 100,
+            opacity: Number.isFinite(computedOpacity) ? computedOpacity : fallback.opacity,
+            backgroundOpacity: isWidgetLayoutObjectColorElement(key)
+                ? getWidgetComputedBackgroundOpacity(computed.backgroundColor, fallback.backgroundOpacity)
+                : fallback.backgroundOpacity,
+            textAlign: isWidgetLayoutTextElement(key)
+                ? (WIDGET_LAYOUT_AUTO_FIT_TEXT_KEYS.has(key)
+                    ? 'center'
+                    : normalizeWidgetTextAlign(computedTextAlign, textDefault.align))
+                : fallback.textAlign,
+            fontSize
         };
     });
 
@@ -297,11 +337,12 @@ const widgetLayoutTextFitTimers = new WeakMap();
 function fitWidgetLayoutCardText(card) {
     if (!card || !card.classList.contains('has-custom-layout')) return;
     const profiles = {
-        title: { height: 0.42, width: 0.085, min: 9, max: 58, wrap: true },
-        author: { height: 0.55, width: 0.07, min: 9, max: 28, wrap: true },
-        requester: { height: 0.52, width: 0.13, min: 9, max: 24, wrap: false },
-        currentTime: { height: 0.62, width: 0.22, min: 9, max: 32, wrap: false },
-        duration: { height: 0.62, width: 0.22, min: 9, max: 32, wrap: false }
+        title: { height: 0.55, width: 0.075, min: 11, max: 42, wrap: false },
+        author: { height: 0.62, width: 0.07, min: 9, max: 24, wrap: false },
+        requester: { height: 0.58, width: 0.1, min: 10, max: 30, wrap: false },
+        srStatus: { height: 0.55, width: 0.18, min: 10, max: 28, wrap: false },
+        currentTime: { height: 0.58, width: 0.18, min: 9, max: 24, wrap: false },
+        duration: { height: 0.58, width: 0.18, min: 9, max: 24, wrap: false }
     };
 
     Object.entries(profiles).forEach(([key, profile]) => {
@@ -310,9 +351,13 @@ function fitWidgetLayoutCardText(card) {
         element.style.fontSize = '';
         const width = Math.max(1, element.clientWidth);
         const height = Math.max(1, element.clientHeight);
-        let size = Math.min(profile.max, Math.max(profile.min, Math.min(height * profile.height, width * profile.width)));
+        const storedRatio = Number(element.dataset.widgetFontSizeRatio);
+        let size = Number.isFinite(storedRatio) && storedRatio > 0
+            ? Math.max(1, card.clientHeight * storedRatio / 100)
+            : Math.min(profile.max, Math.max(profile.min, Math.min(height * profile.height, width * profile.width)));
+        const minimumSize = Math.min(profile.min, size);
         element.style.fontSize = size + 'px';
-        while (size > profile.min && (element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1)) {
+        while (size > minimumSize && (element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1)) {
             size -= 1;
             element.style.fontSize = size + 'px';
         }
@@ -344,10 +389,16 @@ function scheduleWidgetLayoutCardTextFit(card) {
 
 function applyWidgetLayoutToCard(card, config, options = {}) {
     if (!card) return null;
-    const normalized = normalizeWidgetLayoutConfig(config);
+    const suppliedLayout = normalizeWidgetLayoutConfig(config);
+    const isWidgetSurface = !!(card.ownerDocument && card.ownerDocument.body && card.ownerDocument.body.classList.contains('now-playing-widget-page'));
+    const normalized = suppliedLayout || (isWidgetSurface ? normalizeWidgetLayoutConfig(createDefaultWidgetLayoutConfig()) : null);
+    const layoutModeChanged = card.classList.contains('has-custom-layout') !== !!normalized;
+    if (layoutModeChanged) card.classList.add('is-widget-layout-switching');
     card.classList.add('widget-layout-card');
     card.classList.toggle('has-custom-layout', !!normalized);
+    card.classList.toggle('is-default-widget-layout', !suppliedLayout && isWidgetSurface);
     card.classList.toggle('is-layout-editor-card', !!options.editor);
+    const cardHeight = Math.max(1, card.getBoundingClientRect().height);
 
     WIDGET_LAYOUT_ELEMENT_KEYS.forEach(key => {
         const element = card.querySelector('[data-widget-element="' + key + '"]');
@@ -378,13 +429,25 @@ function applyWidgetLayoutToCard(card, config, options = {}) {
             element.style.textAlign = align;
             element.style.justifyContent = getWidgetTextJustifyContent(align);
             element.style.justifyItems = getWidgetTextJustifyItems(align);
-            if (layout.textColorMode === 'custom') element.style.color = layout.textColor;
+            if (layout.textColorMode === 'custom') {
+                element.classList.add('is-widget-custom-text-color');
+                element.style.color = layout.textColor;
+            }
+            if (layout.fontSize > 0) {
+                element.dataset.widgetFontSizeRatio = String(layout.fontSize);
+                element.style.fontSize = (cardHeight * layout.fontSize / 100) + 'px';
+            }
         }
         element.classList.toggle('is-widget-element-hidden', !layout.visible);
         element.classList.toggle('is-widget-element-outside', !!options.editor && isWidgetLayoutOutOfBounds(layout));
     });
 
     scheduleWidgetLayoutCardTextFit(card);
+    if (layoutModeChanged) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            card.classList.remove('is-widget-layout-switching');
+        }));
+    }
     return normalized;
 }
 
@@ -523,13 +586,24 @@ function readAverageCoverColor(src) {
 }
 
 function applyCoverThemeToNowPlayingCard(card, src) {
-    if (!card || !src) return;
+    if (!card) return;
+    if (!src) {
+        card.style.removeProperty('--np-cover-image');
+        return;
+    }
     card.dataset.coverThemeSrc = src;
+    card.dataset.coverTheme = 'loading';
+    card.style.setProperty('--np-cover-image', 'url(' + JSON.stringify(String(src)) + ')');
 
     readAverageCoverColor(src).then(color => {
         if (card.dataset.coverThemeSrc !== src) return;
+        const luma = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
         card.style.setProperty('--np-cover-rgb', color.r + ', ' + color.g + ', ' + color.b);
-    }).catch(() => {});
+        card.style.setProperty('--np-cover-contrast-rgb', luma > 145 ? '18, 21, 22' : '255, 244, 221');
+        card.dataset.coverTheme = 'ready';
+    }).catch(() => {
+        if (card.dataset.coverThemeSrc === src) card.dataset.coverTheme = 'image';
+    });
 }
 
 function getNowPlayingWaveBarHeight(index) {
@@ -777,6 +851,11 @@ function syncWidgetAudio(state, force = false) {
         return;
     }
 
+    if (state.source === 'spotify') {
+        stopWidgetAudio();
+        return;
+    }
+
     loadWidgetAudioApi();
     if (!widgetAudioPlayer || !widgetAudioReady || !state.id) return;
 
@@ -887,6 +966,7 @@ function renderEmpty() {
 
 function getWidgetSongKey(state) {
     return [
+        state.source || '',
         state.id || '',
         state.title || '',
         state.author || '',
@@ -918,13 +998,20 @@ function updateWidgetCardState(state, progress) {
     const durationEl = document.getElementById('widget-now-playing-duration');
     const progressEl = document.getElementById('widget-now-playing-progress');
     const waveEl = document.getElementById('widget-now-playing-wave');
+    const srStatusEl = document.getElementById('widget-now-playing-sr-status');
     const isSkipEffect = state.waveEffect === 'skip';
     const isFadeEffect = state.waveEffect === 'fade';
     const isWaveHeld = !!state.waveHold && !isSkipEffect;
+    const srEnabled = state.srEnabled === true || state.srEnabled === 'true';
 
     if (currentEl) currentEl.innerText = formatTime(state.currentTime);
     if (durationEl) durationEl.innerText = formatTime(state.duration);
     if (progressEl) progressEl.style.width = progress + '%';
+    if (srStatusEl) {
+        srStatusEl.innerText = '!SR ' + (srEnabled ? 'ON' : 'OFF');
+        srStatusEl.classList.toggle('is-sr-on', srEnabled);
+        srStatusEl.classList.toggle('is-sr-off', !srEnabled);
+    }
     if (waveEl) {
         waveEl.style.setProperty('--np-progress', progress + '%');
         syncNowPlayingWaveBars(waveEl);
@@ -1014,6 +1101,9 @@ function renderState(state) {
     const skipClass = waveEffect === 'skip' ? ' is-skipping' : '';
     const fadeClass = waveEffect === 'fade' ? ' is-wave-fading' : '';
     const holdClass = state.waveHold && waveEffect !== 'skip' ? ' is-wave-held' : '';
+    const srEnabled = state.srEnabled === true || state.srEnabled === 'true';
+    const srStatusClass = srEnabled ? ' is-sr-on' : ' is-sr-off';
+    const srStatusText = '!SR ' + (srEnabled ? 'ON' : 'OFF');
     const songKey = getWidgetSongKey(state);
 
     if (songKey === activeWidgetSongKey && document.getElementById('widget-now-playing-card')) {
@@ -1044,6 +1134,7 @@ function renderState(state) {
                 '</div>' +
             '</div>' +
             '<span class="np-card-user" data-widget-element="requester">' + user + '</span>' +
+            '<span id="widget-now-playing-sr-status" class="np-card-sr-status' + srStatusClass + '" data-widget-element="srStatus">' + srStatusText + '</span>' +
             '<div class="np-card-progress" data-widget-element="progress"><div id="widget-now-playing-progress" class="np-card-progress-fill" style="width: ' + progress + '%"></div></div>' +
         '</div>';
 
@@ -1246,12 +1337,13 @@ if (!WIDGET_EDITOR_PREVIEW) {
         // PROJECT VERSION AND GITHUB DATA
         // =========================================================================
         const PROJECT_NAME = "Better Song Request";
-        const CURRENT_VERSION = "v1.4.0";
+        const CURRENT_VERSION = "v2.0.0";
         const GITHUB_REPO = "xHackMe/better-song-request-streamerbot";
-        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.0.10";
+        const REQUIRED_STREAMERBOT_IMPORT_VERSION = "1.1.0";
         const STREAMERBOT_DIAGNOSTICS_ACTION = "YtmImportDiagnostics";
         const SETTINGS_BACKUP_TYPE = "BETTER_SONG_REQUEST_SETTINGS_BACKUP";
         const LEGACY_SETTINGS_BACKUP_TYPES = ["YTM_SONG_REQUEST_SETTINGS_BACKUP"];
+        const APP_THEME_STORAGE_KEY = "better_song_request_theme";
         const REQUIRED_IMPORT_FEATURES = [
             { key: 'IMPORT_DIAGNOSTICS', label: 'YtmImportDiagnostics' },
             { key: 'CHAT_MESSAGE', label: 'ChatMessage' },
@@ -1262,7 +1354,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
             { key: 'QUEUE_SONGS', label: 'SongQueue / !queue' },
             { key: 'CHANNEL_POINT_REWARD_TRIGGER', label: 'Twitch channel point reward trigger' },
             { key: 'KICK_CHANNEL_REWARD_TRIGGER', label: 'Kick channel reward trigger' },
-            { key: 'MULTI_CHAT_SOURCE', label: 'Twitch/Kick/YouTube replies' }
+            { key: 'MULTI_CHAT_SOURCE', label: 'Twitch/Kick/YouTube replies' },
+            { key: 'SPOTIFY_TRACK_REQUEST', label: 'Spotify track link requests' }
         ];
         const REQUIRED_IMPORT_COMPONENTS = {
             actions: [
@@ -1506,6 +1599,74 @@ if (!WIDGET_EDITOR_PREVIEW) {
             return HOLIDAY_VARIANTS.find(variant => variant.ranges.some(range => isLocalDateInRange(date, range))) || null;
         }
 
+        function renderHolidayEffects(variant) {
+            const root = document.getElementById('holiday-effects');
+            if (!root) return;
+
+            const holidayKey = variant ? variant.key : '';
+            if (root.dataset.holidayKey === holidayKey) return;
+
+            root.dataset.holidayKey = holidayKey;
+            root.className = holidayKey ? `holiday-effects holiday-effects-${holidayKey}` : 'holiday-effects';
+            root.replaceChildren();
+            if (!variant) return;
+
+            const fragment = document.createDocumentFragment();
+            const addParticle = (className, properties, text = '') => {
+                const particle = document.createElement('span');
+                particle.className = className;
+                particle.textContent = text;
+                Object.entries(properties).forEach(([name, value]) => particle.style.setProperty(name, value));
+                fragment.appendChild(particle);
+            };
+
+            if (holidayKey === 'christmas') {
+                for (let index = 0; index < 20; index++) {
+                    addParticle('holiday-snowflake', {
+                        '--holiday-x': `${Math.random() * 100}%`,
+                        '--holiday-delay': `${-(Math.random() * 8).toFixed(2)}s`,
+                        '--holiday-duration': `${(4 + Math.random() * 5).toFixed(2)}s`,
+                        '--holiday-drift': `${Math.round(-20 + Math.random() * 40)}px`,
+                        '--holiday-size': `${(7 + Math.random() * 9).toFixed(1)}px`
+                    }, '\u2744');
+                }
+            } else if (holidayKey === 'newyear') {
+                const colors = ['#ffcf45', '#ff5b4d', '#5ac5bd', '#9a76e8', '#f4f0df'];
+                for (let index = 0; index < 8; index++) {
+                    addParticle('holiday-firework', {
+                        '--holiday-x': `${16 + Math.random() * 68}%`,
+                        '--holiday-y': `${24 + Math.random() * 52}%`,
+                        '--holiday-delay': `${-(Math.random() * 4.6).toFixed(2)}s`,
+                        '--holiday-color': colors[index % colors.length]
+                    });
+                }
+            } else if (holidayKey === 'valentine') {
+                for (let index = 0; index < 12; index++) {
+                    addParticle('holiday-heart', {
+                        '--holiday-x': `${8 + Math.random() * 84}%`,
+                        '--holiday-delay': `${-(Math.random() * 9).toFixed(2)}s`,
+                        '--holiday-duration': `${(5 + Math.random() * 5).toFixed(2)}s`,
+                        '--holiday-drift': `${Math.round(-24 + Math.random() * 48)}px`,
+                        '--holiday-size': `${(10 + Math.random() * 12).toFixed(1)}px`
+                    }, '\u2665');
+                }
+            } else if (holidayKey === 'april') {
+                const colors = ['#ff4f45', '#ff9c39', '#f3d34a', '#4fc3b2', '#246c91', '#764ac7'];
+                for (let index = 0; index < 18; index++) {
+                    addParticle('holiday-bubble', {
+                        '--holiday-x': `${5 + Math.random() * 90}%`,
+                        '--holiday-delay': `${-(Math.random() * 10).toFixed(2)}s`,
+                        '--holiday-duration': `${(5 + Math.random() * 6).toFixed(2)}s`,
+                        '--holiday-drift': `${Math.round(-30 + Math.random() * 60)}px`,
+                        '--holiday-color': colors[index % colors.length],
+                        '--holiday-size': `${(7 + Math.random() * 15).toFixed(1)}px`
+                    });
+                }
+            }
+
+            root.appendChild(fragment);
+        }
+
         function applyHolidayVariant() {
             const themeClasses = HOLIDAY_VARIANTS.map(variant => variant.className);
             document.body.classList.remove(...themeClasses);
@@ -1518,6 +1679,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             } else if (messageEl) {
                 messageEl.innerText = '';
             }
+            renderHolidayEffects(activeHolidayVariant);
         }
 
         function isHolidayStartupSong(song) {
@@ -1552,6 +1714,32 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), vars[k]);
             }
             return text;
+        }
+
+        let appTheme = localStorage.getItem(APP_THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark';
+
+        function updateThemeToggleButton() {
+            const button = document.getElementById('theme-toggle');
+            if (!button) return;
+            const isDark = appTheme !== 'light';
+            const label = t('ui_theme_toggle');
+            button.classList.toggle('is-dark', isDark);
+            button.classList.toggle('is-light', !isDark);
+            button.title = label;
+            button.setAttribute('aria-label', label);
+            button.setAttribute('aria-pressed', String(isDark));
+        }
+
+        function applyAppTheme(theme = appTheme) {
+            appTheme = theme === 'light' ? 'light' : 'dark';
+            document.body.classList.toggle('theme-dark', appTheme === 'dark');
+            document.body.classList.toggle('theme-light', appTheme === 'light');
+            updateThemeToggleButton();
+        }
+
+        function toggleAppTheme() {
+            applyAppTheme(appTheme === 'dark' ? 'light' : 'dark');
+            localStorage.setItem(APP_THEME_STORAGE_KEY, appTheme);
         }
 
         function changeLanguage(langCode) {
@@ -1600,6 +1788,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
             document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+            updateThemeToggleButton();
 
             // UPDATE BUTTON DYNAMIC TRANSLATION:
             const updateBtn = document.getElementById('update-btn');
@@ -1619,6 +1808,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             renderBaseActionButtons();
             renderFooterVersions();
             renderViewerHistory();
+            renderSpotifyStatus();
             
             updateTutLink(); 
             renderWebsocketStatus();
@@ -1630,8 +1820,50 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
         }
 
+        const SONG_SOURCE_YOUTUBE = 'youtube';
+        const SONG_SOURCE_SPOTIFY = 'spotify';
+        const SPOTIFY_PLAYER_SDK_URL = 'https://sdk.scdn.co/spotify-player.js';
+        const PLAYER_VOLUME_STORAGE_KEY = 'ytm_player_volume';
+        const SPOTIFY_AUTH_STATE_KEY = 'ytm_spotify_auth_state';
+        const SPOTIFY_CODE_VERIFIER_KEY = 'ytm_spotify_code_verifier';
+        const SPOTIFY_CLIENT_ID_KEY = 'ytm_spotify_client_id';
+        const SPOTIFY_ENABLED_KEY = 'ytm_spotify_enabled';
+        const SPOTIFY_ACCESS_TOKEN_KEY = 'ytm_spotify_access_token';
+        const SPOTIFY_REFRESH_TOKEN_KEY = 'ytm_spotify_refresh_token';
+        const SPOTIFY_TOKEN_EXPIRES_KEY = 'ytm_spotify_token_expires_at';
+        const SPOTIFY_SCOPES = [
+            'streaming',
+            'user-read-email',
+            'user-read-private',
+            'user-modify-playback-state',
+            'user-read-playback-state',
+            'playlist-read-private',
+            'playlist-read-collaborative'
+        ];
+        const FALLBACK_COVER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 160 160%22%3E%3Crect width=%22160%22 height=%22160%22 fill=%22%23141b22%22/%3E%3Ccircle cx=%2280%22 cy=%2280%22 r=%2242%22 fill=%22%23263544%22/%3E%3Cpath d=%22M70 55v58l45-29z%22 fill=%22%23b7c6d6%22/%3E%3C/svg%3E';
+
         // =========================================================================
         let API_KEY = localStorage.getItem('ytm_api_key') || ''; 
+        let SPOTIFY_CLIENT_ID = localStorage.getItem(SPOTIFY_CLIENT_ID_KEY) || '';
+        const storedSpotifyEnabled = localStorage.getItem(SPOTIFY_ENABLED_KEY);
+        let SPOTIFY_ENABLED = storedSpotifyEnabled === null ? !!SPOTIFY_CLIENT_ID : storedSpotifyEnabled === 'true';
+        if (storedSpotifyEnabled === null && SPOTIFY_CLIENT_ID) localStorage.setItem(SPOTIFY_ENABLED_KEY, 'true');
+        let spotifyAccessToken = localStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY) || '';
+        let spotifyRefreshToken = localStorage.getItem(SPOTIFY_REFRESH_TOKEN_KEY) || '';
+        let spotifyTokenExpiresAt = parseInt(localStorage.getItem(SPOTIFY_TOKEN_EXPIRES_KEY) || '0', 10) || 0;
+        let spotifySdkPromise = null;
+        let spotifyPlayer = null;
+        let spotifyDeviceId = '';
+        let spotifyPlayerReady = false;
+        let spotifyPlaybackState = null;
+        let spotifyPlaybackMonitor = null;
+        let spotifyTrackEndHandled = false;
+        let spotifyLastError = '';
+        const storedPlayerVolume = localStorage.getItem(PLAYER_VOLUME_STORAGE_KEY);
+        let PLAYER_VOLUME = storedPlayerVolume === null
+            ? null
+            : Math.min(100, Math.max(0, Number(storedPlayerVolume) || 0));
+        let playerVolumeSyncPending = false;
         let WS_HOST = normalizeWebsocketHost(localStorage.getItem('ytm_ws_host') || DEFAULT_STREAMERBOT_WS_HOST);
         let WS_PORT = localStorage.getItem('ytm_ws_port') || '8080';
         let WS_PASS = localStorage.getItem('ytm_ws_pass') || '';
@@ -1640,10 +1872,13 @@ if (!WIDGET_EDITOR_PREVIEW) {
         let wsStatusKey = 'ui_bot_connecting';
         let wsStatusColor = '#ffaa00';
         const QUEUE_STORAGE_KEY = 'ytm_persisted_queue';
+        const SR_REMEMBER_STATE_STORAGE_KEY = 'ytm_sr_remember_state';
+        const SR_ENABLED_STORAGE_KEY = 'ytm_sr_enabled';
         const FAVORITE_SONGS_STORAGE_KEY = 'ytm_favorite_songs';
         const VIEWER_HISTORY_STORAGE_KEY = 'ytm_viewer_song_history';
         const VIEWER_HISTORY_LIMIT = 1000;
         let SHOULD_PERSIST_QUEUE = localStorage.getItem('ytm_persist_queue') === 'true';
+        let SHOULD_REMEMBER_SR_STATE = localStorage.getItem(SR_REMEMBER_STATE_STORAGE_KEY) === 'true';
         let queuePersistenceReady = false;
         let SR_MAX_DURATION_MINUTES = normalizePositiveInteger(localStorage.getItem('ytm_sr_max_duration_minutes'), 15);
         let SR_REQUIRE_MUSIC_CATEGORY = localStorage.getItem('ytm_sr_require_music_category') !== 'false';
@@ -1664,7 +1899,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         const HOLIDAY_VARIANTS = [
 		//	{ key: 'TEST', className: 'theme-christmas', messageKey: 'ui_holiday_christmas', ranges: [{ sm: 0, sd: 1, em: 11, ed: 31 }], song: { id: 'aAkMkVFwAoo', title: 'Mariah Carey - All I Want for Christmas Is You', author: 'Mariah Carey', duration: 241, user: 'Auto' } },
 		//	{ key: 'TEST', className: 'theme-newyear', messageKey: 'ui_holiday_newyear', ranges: [{ sm: 0, sd: 1, em: 11, ed: 31 }], song: { id: '9jK-NcRmVcw', title: 'Europe - The Final Countdown', author: 'Europe', duration: 318, user: 'Auto' } },
-		// 	{ key: 'TEST', className: 'theme-valentine', messageKey: 'ui_holiday_valentine', ranges: [{ sm: 0, sd: 1, em: 11, ed: 31 }], song: { id: '2Vv-BfVoq4g', title: 'Ed Sheeran - Perfect', author: 'Ed Sheeran', duration: 263, user: 'Auto' } },
+		//  {key: 'TEST', className: 'theme-valentine', messageKey: 'ui_holiday_valentine', ranges: [{ sm: 0, sd: 1, em: 11, ed: 31 }], song: { id: '2Vv-BfVoq4g', title: 'Ed Sheeran - Perfect', author: 'Ed Sheeran', duration: 263, user: 'Auto' } },
 		//	{ key: 'TEST', className: 'theme-april', messageKey: 'ui_holiday_april', ranges: [{ sm: 0, sd: 1, em: 11, ed: 31 }], song: { id: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', author: 'Rick Astley', duration: 213, user: 'Auto' } },
             { key: 'christmas', className: 'theme-christmas', messageKey: 'ui_holiday_christmas', ranges: [{ sm: 11, sd: 24, em: 11, ed: 27 }], song: { id: 'aAkMkVFwAoo', title: 'Mariah Carey - All I Want for Christmas Is You', author: 'Mariah Carey', duration: 241, user: 'Auto' } },
             { key: 'newyear', className: 'theme-newyear', messageKey: 'ui_holiday_newyear', ranges: [{ sm: 11, sd: 31, em: 0, ed: 1 }], song: { id: '9jK-NcRmVcw', title: 'Europe - The Final Countdown', author: 'Europe', duration: 318, user: 'Auto' } },
@@ -1699,6 +1934,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             title: 'ui_widget_element_title',
             author: 'ui_widget_element_author',
             requester: 'ui_widget_element_requester',
+            srStatus: 'ui_widget_element_sr_status',
             meterBackground: 'ui_widget_element_meter_background',
             currentTime: 'ui_widget_element_current_time',
             waveform: 'ui_widget_element_waveform',
@@ -1724,6 +1960,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         let importStatusState = 'unknown';
         let importStatusMissingItems = [];
         let importStatusVersion = '';
+        let lastImportStatusToastKey = '';
         let importDiagnosticsWaiters = [];
         let streamerBotRequestWaiters = new Map();
         let importStatusCheckTimeout = null;
@@ -1756,7 +1993,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         let dragSourceIndex = null;
         let favoriteDragSourceIndex = null;
         let playlistDragSourceIndex = null;
-        let isSrEnabled = false; 
+        let isSrEnabled = SHOULD_REMEMBER_SR_STATE && localStorage.getItem(SR_ENABLED_STORAGE_KEY) === 'true'; 
         let basePlaybackMode = 'ordered';
         let baseActionButtonMode = API_KEY ? 'downloading' : 'api-required';
 
@@ -1764,18 +2001,18 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const actionHandlers = {
                 openPlaylistManager, startSystem, startSystemShuffle, openSettings, prevSong, togglePlay,
                 stopSongUI, skipSong, addManualUrl, openBanList, toggleDebug,
-                openChangelog, openTutorial, closeSettings, switchSettingsTab,
+                openChangelog, openTutorial, openSettingsFromTutorial, closeSettings, switchSettingsTab,
                 saveWsConfig, toggleApiVisibility, saveApiKey, closeChangelog,
                 clearAllBans, closeBanList, closePlaylistManager, addBasePlaylist,
                 closeTutorial, copySbCode, copyWidgetUrl, clearQueueWithConfirm,
                 runDiagnostics, checkImportStatus, exportSettings, chooseSettingsImport,
                 sendWidgetTest, openViewerHistory, closeViewerHistory, clearViewerHistoryWithConfirm,
                 openWidgetCustomizer, closeWidgetCustomizer, saveWidgetLayout, resetWidgetLayoutWithConfirm,
-                undoWidgetLayout
+                undoWidgetLayout, saveSpotifyConfig, connectSpotify, disconnectSpotify, toggleAppTheme
             };
 
-            const changeHandlers = { toggleSR, handleQueuePersistenceToggle, saveSongRequestSettings, handleWidgetAudioToggle, importSettingsFile, renderViewerHistory };
-            const inputHandlers = { renderBaseList, updateTutLink, saveSongRequestSettings, updateWidgetUrlDisplay, renderViewerHistory };
+            const changeHandlers = { toggleSR, handleSrRememberStateToggle, handleQueuePersistenceToggle, saveSongRequestSettings, handleWidgetAudioToggle, handleSpotifyEnabledToggle, importSettingsFile, renderViewerHistory };
+            const inputHandlers = { renderBaseList, updateTutLink, saveSongRequestSettings, updateWidgetUrlDisplay, renderViewerHistory, setSpotifyGuiVolume };
 
             document.querySelectorAll('[data-action]').forEach(el => {
                 el.addEventListener('click', () => {
@@ -1801,8 +2038,44 @@ if (!WIDGET_EDITOR_PREVIEW) {
             });
         }
 
+        function bindSongCardButtonEvents() {
+            document.addEventListener('click', event => {
+                const favoriteButton = event.target.closest('[data-favorite-action]');
+                if (favoriteButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const action = favoriteButton.dataset.favoriteAction;
+                    if (action === 'base') toggleFavoriteFromBase(favoriteButton.dataset.songKey || '');
+                    else if (action === 'queue') toggleFavoriteFromQueue(parseInt(favoriteButton.dataset.songIndex || '-1', 10));
+                    else if (action === 'current') toggleFavoriteFromCurrentSong();
+                    else if (action === 'history') toggleFavoriteFromHistory(favoriteButton.dataset.songKey || '');
+                    return;
+                }
+
+                const addButton = event.target.closest('[data-add-song-action]');
+                if (addButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const action = addButton.dataset.addSongAction;
+                    if (action === 'base') addBaseSongToQueue(addButton.dataset.songKey || '');
+                    else if (action === 'history') addHistorySongToQueue(addButton.dataset.songKey || '');
+                }
+            });
+        }
+
+        function initializeSongRequestToggleState() {
+            const srToggle = document.getElementById('sr-toggle-cb');
+            const rememberToggle = document.getElementById('sr-remember-state-cb');
+            if (rememberToggle) rememberToggle.checked = SHOULD_REMEMBER_SR_STATE;
+            if (srToggle) srToggle.checked = isSrEnabled;
+            toggleSR(true);
+        }
+
+        applyAppTheme(appTheme);
         bindStaticUiEvents();
+        bindSongCardButtonEvents();
         bindWidgetCustomizerEvents();
+        setupNowPlayingTitleAutoFit();
         const wsHostInput = document.getElementById('ws-host-input');
         const wsPortInput = document.getElementById('ws-port-input');
         const wsPassInput = document.getElementById('ws-pass-input');
@@ -1816,6 +2089,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
         const srGlobalLimitEnabledInput = document.getElementById('sr-global-limit-enabled-cb');
         const srMusicCategoryInput = document.getElementById('sr-music-category-cb');
         const widgetAudioInput = document.getElementById('widget-audio-cb');
+        const spotifyEnabledInput = document.getElementById('spotify-enabled-cb');
+        const spotifyClientIdInput = document.getElementById('spotify-client-id-input');
+        const spotifyRedirectInput = document.getElementById('spotify-redirect-uri-output');
 
         if (wsHostInput) wsHostInput.value = WS_HOST;
         if (wsPortInput) wsPortInput.value = WS_PORT;
@@ -1830,6 +2106,10 @@ if (!WIDGET_EDITOR_PREVIEW) {
         if (srGlobalLimitEnabledInput) srGlobalLimitEnabledInput.checked = SR_GLOBAL_QUEUE_LIMIT_ENABLED;
         if (srMusicCategoryInput) srMusicCategoryInput.checked = SR_REQUIRE_MUSIC_CATEGORY;
         if (widgetAudioInput) widgetAudioInput.checked = WIDGET_AUDIO_ENABLED_CONFIG;
+        if (spotifyEnabledInput) spotifyEnabledInput.checked = SPOTIFY_ENABLED;
+        if (spotifyClientIdInput) spotifyClientIdInput.value = SPOTIFY_CLIENT_ID;
+        if (spotifyRedirectInput) spotifyRedirectInput.value = getSpotifyRedirectUri();
+        initializeSongRequestToggleState();
         updateSongRequestLimitInputStates();
 
         applyHolidayVariant();
@@ -1837,21 +2117,47 @@ if (!WIDGET_EDITOR_PREVIEW) {
         window.addEventListener('pageshow', refreshHolidayVariant);
         setInterval(refreshHolidayVariant, 30000);
         setInterval(updateNowPlayingProgress, 500);
+        setInterval(syncPlayerVolumePreference, 1000);
         
         window.onload = () => { 
             applyTranslations(); 
+            handleSpotifyAuthCallback();
+            if (canTryNativeSpotifyPlayback()) initSpotifyPlayer().catch(() => {});
+            renderSpotifyStatus();
             checkGithubUpdates(); 
         };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ensureWebsocketConnection, { once: true });
+        } else {
+            ensureWebsocketConnection();
+        }
 
         // ===================== SETTINGS MODAL =====================
         function openSettings() { 
             document.getElementById('api-key-input').value = API_KEY;
+            const spotifyClientIdInput = document.getElementById('spotify-client-id-input');
+            const spotifyRedirectInput = document.getElementById('spotify-redirect-uri-output');
+            if (spotifyClientIdInput) spotifyClientIdInput.value = SPOTIFY_CLIENT_ID;
+            if (spotifyRedirectInput) spotifyRedirectInput.value = getSpotifyRedirectUri();
+            renderSpotifyStatus();
             widgetUrlBaseline = getWidgetUrl();
             widgetUrlWarningEnabled = true;
             updateWidgetUrlDisplay();
             renderSettingsMessages();
             document.getElementById('settings-modal').style.display = 'flex'; 
         }
+
+        function openSettingsFromTutorial(targetId = '') {
+            document.getElementById('tutorial-modal').style.display = 'none';
+            switchSettingsTab('general');
+            openSettings();
+            requestAnimationFrame(() => {
+                const target = targetId ? document.getElementById(targetId) : null;
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+
         function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
         
         function switchSettingsTab(tabName) {
@@ -2097,7 +2403,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const url = new URL('now-playing-widget.html', window.location.href);
             url.searchParams.set('editor', '1');
             url.searchParams.set('lang', currentLang || 'en');
-            url.searchParams.set('v', '20260626-140R04');
+    url.searchParams.set('v', '20260731-uiR39');
             return url.toString();
         }
 
@@ -2119,6 +2425,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 type: 'NOW_PLAYING_STATE',
                 hasSong: true,
                 id: WIDGET_CUSTOMIZER_DEMO_SONG.id,
+                source: SONG_SOURCE_YOUTUBE,
+                sourceLabel: 'YouTube',
+                link: 'https://youtu.be/' + WIDGET_CUSTOMIZER_DEMO_SONG.id,
                 title: WIDGET_CUSTOMIZER_DEMO_SONG.title,
                 author: WIDGET_CUSTOMIZER_DEMO_SONG.author,
                 user: t('ui_widget_demo_requester'),
@@ -2126,6 +2435,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 currentTime: 78,
                 duration: WIDGET_CUSTOMIZER_DEMO_SONG.duration,
                 progress: (78 / WIDGET_CUSTOMIZER_DEMO_SONG.duration) * 100,
+                srEnabled: true,
                 isPlaying: true,
                 waveEnding: false,
                 waveEffect: '',
@@ -2769,17 +3079,19 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const layout = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
             const knob = event.target.closest('[data-widget-rotation-knob]');
             if (!layout || !knob) return;
-            pushWidgetLayoutHistory();
             hideWidgetSnapGuides();
             const rect = knob.getBoundingClientRect();
             const pointerAngle = getWidgetPointerAngleDegrees(event.clientX, event.clientY, rect.left + rect.width / 2, rect.top + rect.height / 2);
             widgetCustomizerInteraction = {
                 mode: 'control-rotate',
+                startX: event.clientX,
+                startY: event.clientY,
                 centerX: rect.left + rect.width / 2,
                 centerY: rect.top + rect.height / 2,
                 lastPointerAngle: pointerAngle,
                 unwrappedRotation: Number(layout.rotation) || 0,
-                layout: { ...layout }
+                layout: { ...layout },
+                hasChanged: false
             };
             const card = getWidgetCustomizerPreviewCard();
             const activeElement = card && card.querySelector('[data-widget-element="' + widgetCustomizerSelectedKey + '"]');
@@ -2789,7 +3101,6 @@ if (!WIDGET_EDITOR_PREVIEW) {
             knob.classList.add('is-rotating');
             event.preventDefault();
             event.stopPropagation();
-            handleWidgetCustomizerPointerMove(event);
         }
 
         function beginWidgetCustomizerInteraction(event, mode) {
@@ -2799,7 +3110,6 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const overlay = document.getElementById('widget-customizer-selection');
             if (!layout || !layout.visible || !stage || !overlay) return;
 
-            pushWidgetLayoutHistory();
             hideWidgetSnapGuides();
             const rect = stage.getBoundingClientRect();
             const centerX = rect.left + ((layout.x + layout.width / 2) / 100) * rect.width;
@@ -2813,7 +3123,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 centerY,
                 lastPointerAngle: getWidgetPointerAngleDegrees(event.clientX, event.clientY, centerX, centerY),
                 unwrappedRotation: Number(layout.rotation) || 0,
-                layout: { ...layout }
+                layout: { ...layout },
+                hasChanged: false
             };
 
             const card = getWidgetCustomizerPreviewCard();
@@ -2829,6 +3140,16 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const next = widgetLayoutDraft.elements[widgetCustomizerSelectedKey];
             const start = interaction.layout;
             const minSize = getWidgetLayoutMinSize(widgetCustomizerSelectedKey);
+            if (!interaction.hasChanged) {
+                const pointerDistance = Math.hypot(
+                    event.clientX - interaction.startX,
+                    event.clientY - interaction.startY
+                );
+                if (pointerDistance < 2) return;
+                interaction.hasChanged = true;
+                pushWidgetLayoutHistory();
+            }
+            markWidgetCustomizerLayoutChanged();
             if (interaction.mode === 'control-rotate') {
                 hideWidgetSnapGuides();
                 const angle = getWidgetPointerAngleDegrees(event.clientX, event.clientY, interaction.centerX, interaction.centerY);
@@ -2839,13 +3160,11 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 if (event.shiftKey) rotation = Math.round(rotation / 15) * 15;
                 next.rotation = rotation;
                 widgetLayoutDraft.updatedAt = Date.now();
-                markWidgetCustomizerLayoutChanged();
                 applyWidgetLayoutDraftToPreview();
                 return;
             }
             const dx = ((event.clientX - interaction.startX) / Math.max(1, interaction.rect.width)) * 100;
             const dy = ((event.clientY - interaction.startY) / Math.max(1, interaction.rect.height)) * 100;
-            markWidgetCustomizerLayoutChanged();
 
             if (interaction.mode === 'move') {
                 next.x = clampWidgetLayoutNumber(start.x + dx, getWidgetLayoutMinPosition(start.width), getWidgetLayoutMaxPosition(start.width), start.x);
@@ -3118,9 +3437,26 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const rootEl = document.getElementById('toast-root');
             if (!rootEl) return;
             const toast = document.createElement('div');
-            toast.className = 'toast' + (type === 'error' ? ' is-error' : (type === 'ok' ? ' is-ok' : (type === 'warn' ? ' is-warn' : '')));
-            toast.textContent = message;
+            const isError = type === 'error';
+            toast.className = 'toast' + (isError ? ' is-error is-sticky' : (type === 'ok' ? ' is-ok' : (type === 'warn' ? ' is-warn' : '')));
+            const messageEl = document.createElement('span');
+            messageEl.className = 'toast-message';
+            messageEl.textContent = message;
+            toast.appendChild(messageEl);
+            if (isError) {
+                const closeEl = document.createElement('button');
+                closeEl.type = 'button';
+                closeEl.className = 'toast-close';
+                closeEl.textContent = t('ui_confirm_ok');
+                closeEl.addEventListener('click', event => {
+                    event.stopPropagation();
+                    toast.remove();
+                });
+                toast.addEventListener('click', () => toast.remove());
+                toast.appendChild(closeEl);
+            }
             rootEl.appendChild(toast);
+            if (isError) return;
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(8px)';
@@ -3386,20 +3722,15 @@ if (!WIDGET_EDITOR_PREVIEW) {
             banner.className = 'import-status-banner' + (toneClass ? ' ' + toneClass : '') + (message ? '' : ' is-hidden');
             banner.textContent = '';
 
-            if (!message) return;
+            if (!message) {
+                lastImportStatusToastKey = '';
+                return;
+            }
 
-            const messageEl = document.createElement('span');
-            messageEl.className = 'import-status-text';
-            messageEl.innerText = message;
-            banner.appendChild(messageEl);
-
-            if (importStatusState === 'missing') {
-                const helpBtn = document.createElement('button');
-                helpBtn.type = 'button';
-                helpBtn.className = 'btn-help import-help-btn';
-                helpBtn.innerText = t('ui_help_btn');
-                helpBtn.addEventListener('click', openTutorial);
-                banner.appendChild(helpBtn);
+            const toastKey = `${importStatusState}|${message}`;
+            if (toastKey !== lastImportStatusToastKey && importStatusState !== 'checking') {
+                lastImportStatusToastKey = toastKey;
+                showToast(message, importStatusState === 'missing' ? 'error' : (toneClass === 'is-warn' ? 'warn' : 'normal'));
             }
         }
 
@@ -3558,7 +3889,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
             if (widgetTestState) {
                 if (Date.now() < widgetTestStateUntil) {
-                    return { ...widgetTestState, updatedAt: Date.now() };
+                    return { ...widgetTestState, srEnabled: isSrEnabled, updatedAt: Date.now() };
                 }
                 widgetTestState = null;
             }
@@ -3570,6 +3901,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 type: 'NOW_PLAYING_STATE',
                 hasSong: true,
                 id: 'dQw4w9WgXcQ',
+                source: SONG_SOURCE_YOUTUBE,
+                sourceLabel: 'YouTube',
+                link: 'https://youtu.be/dQw4w9WgXcQ',
                 title: t('ui_widget_test_title'),
                 author: PROJECT_NAME,
                 user: 'OBS',
@@ -3577,6 +3911,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 currentTime: 42,
                 duration: 180,
                 progress: 23,
+                srEnabled: isSrEnabled,
                 isPlaying: false,
                 waveEnding: false,
                 waveEffect: '',
@@ -3641,15 +3976,40 @@ if (!WIDGET_EDITOR_PREVIEW) {
             };
         }
 
+        function getExplicitSongQueueOrigin(song) {
+            const origin = String(song && song.queueOrigin || '').trim().toLowerCase();
+            return origin === 'playlist' || origin === 'manual' ? origin : '';
+        }
+
+        function getSongQueueOrigin(song, fallback = 'playlist') {
+            const explicitOrigin = getExplicitSongQueueOrigin(song);
+            if (explicitOrigin) return explicitOrigin;
+            const user = String(song && song.user || '').trim();
+            if (user && user !== 'Auto' && user !== 'Favorite') return 'manual';
+            return fallback === 'manual' ? 'manual' : 'playlist';
+        }
+
         function normalizeSongForStorage(song) {
             if (!song || !song.id) return null;
             const chatTarget = normalizeChatTarget(song);
+            const source = getSongSource(song);
+            const identityId = getSongIdentityId(song);
+            if (!identityId) return null;
             return {
-                id: song.id,
+                id: identityId,
+                source,
+                youtubeId: source === SONG_SOURCE_YOUTUBE ? identityId : (song.youtubeId || song.youtubeFallbackId || ''),
+                spotifyId: source === SONG_SOURCE_SPOTIFY ? identityId : (song.spotifyId || ''),
+                spotifyUri: source === SONG_SOURCE_SPOTIFY ? (song.spotifyUri || ('spotify:track:' + identityId)) : (song.spotifyUri || ''),
+                spotifyUrl: source === SONG_SOURCE_SPOTIFY ? (song.spotifyUrl || ('https://open.spotify.com/track/' + identityId)) : (song.spotifyUrl || ''),
+                youtubeFallbackId: song.youtubeFallbackId || '',
+                thumbnail: song.thumbnail || '',
                 title: song.title || 'Unknown Title',
                 author: song.author || 'Unknown Author',
                 user: song.user || 'Auto',
                 duration: normalizePositiveInteger(song.duration, 210),
+                queueOrigin: getSongQueueOrigin(song),
+                fallbackFromSpotify: !!song.fallbackFromSpotify,
                 chatSource: chatTarget ? chatTarget.chatSource : '',
                 youtubeBroadcastId: chatTarget ? chatTarget.youtubeBroadcastId : ''
             };
@@ -3660,9 +4020,17 @@ if (!WIDGET_EDITOR_PREVIEW) {
             if (!normalized) return null;
             return {
                 id: normalized.id,
+                source: normalized.source,
+                youtubeId: normalized.youtubeId,
+                spotifyId: normalized.spotifyId,
+                spotifyUri: normalized.spotifyUri,
+                spotifyUrl: normalized.spotifyUrl,
+                youtubeFallbackId: normalized.youtubeFallbackId,
+                thumbnail: normalized.thumbnail,
                 title: normalized.title,
                 author: normalized.author,
-                duration: normalized.duration
+                duration: normalized.duration,
+                queueOrigin: getExplicitSongQueueOrigin(song) || (song && song.user ? getSongQueueOrigin(song) : '')
             };
         }
 
@@ -3672,8 +4040,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 if (!Array.isArray(parsed)) return [];
                 const seen = new Set();
                 return parsed.map(normalizeFavoriteSong).filter(song => {
-                    if (!song || seen.has(song.id)) return false;
-                    seen.add(song.id);
+                    const key = getSongKey(song);
+                    if (!song || seen.has(key)) return false;
+                    seen.add(key);
                     return true;
                 });
             } catch (error) {
@@ -3684,11 +4053,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function hydrateFavoriteTitleCache() {
             favoriteSongs.forEach(song => {
                 if (!song || !song.id) return;
-                titleCache[song.id] = {
-                    title: song.title,
-                    author: song.author,
-                    duration: song.duration
-                };
+                cacheSongInfo(song);
             });
         }
 
@@ -3703,32 +4068,38 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function isFavoriteSong(id) {
-            return favoriteSongs.some(song => song.id === id);
+            const key = getSongKey(id);
+            return favoriteSongs.some(song => getSongKey(song) === key);
         }
 
         function getBaseSongInfo(id) {
-            const favorite = favoriteSongs.find(song => song.id === id);
+            const key = getSongKey(id);
+            const favorite = favoriteSongs.find(song => getSongKey(song) === key);
             if (favorite) return favorite;
-            return titleCache[id] || null;
+            return titleCache[key] || titleCache[id] || null;
         }
 
         function getBasePoolItems() {
             const seen = new Set();
             const items = [];
+            const playlistKeys = new Set(masterList.map(item => getSongKey(item)).filter(Boolean));
 
             favoriteSongs.forEach((song, index) => {
-                if (!song || !song.id || seen.has(song.id)) return;
-                seen.add(song.id);
-                items.push({ id: song.id, info: song, isFavorite: true, favoriteIndex: index });
+                const key = getSongKey(song);
+                if (!song || !song.id || seen.has(key)) return;
+                seen.add(key);
+                const queueOrigin = playlistKeys.has(key) ? 'playlist' : getSongQueueOrigin(song, 'manual');
+                items.push({ id: song.id, key, info: song, isFavorite: true, favoriteIndex: index, queueOrigin });
             });
 
             let regularIndex = 1;
-            masterList.forEach(id => {
-                if (!id || seen.has(id)) return;
-                const info = titleCache[id];
+            masterList.forEach(item => {
+                const key = typeof item === 'string' ? getSongKey(item) : getSongKey(item);
+                if (!key || seen.has(key)) return;
+                const info = titleCache[key] || (typeof item === 'object' ? item : titleCache[item]);
                 if (!info) return;
-                seen.add(id);
-                items.push({ id, info, isFavorite: false, originalIndex: regularIndex });
+                seen.add(key);
+                items.push({ id: info.id, key, info, isFavorite: false, originalIndex: regularIndex, queueOrigin: 'playlist' });
                 regularIndex += 1;
             });
 
@@ -3740,16 +4111,17 @@ if (!WIDGET_EDITOR_PREVIEW) {
             if (countEl) countEl.innerText = '\u{1F3B5} ' + getBasePoolItems().length;
         }
 
-        function renderFavoriteButton(songId, onClick) {
+        function renderFavoriteButton(songId, dataAttrs = '') {
             const active = isFavoriteSong(songId);
             const label = active ? t('ui_favorite_remove') : t('ui_favorite_add');
-            return `<button class="btn-favorite ${active ? 'is-active' : ''}" draggable="false" onclick="${onClick}" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">&#9733;</button>`;
+            return `<button type="button" class="btn-favorite ${active ? 'is-active' : ''}" draggable="false" ${dataAttrs} title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}" aria-pressed="${active ? 'true' : 'false'}">&#9733;</button>`;
         }
 
         function toggleFavoriteSong(song) {
             const favorite = normalizeFavoriteSong(song);
             if (!favorite) return;
-            const existingIndex = favoriteSongs.findIndex(item => item.id === favorite.id);
+            const favoriteKey = getSongKey(favorite);
+            const existingIndex = favoriteSongs.findIndex(item => getSongKey(item) === favoriteKey);
             const removing = existingIndex !== -1;
 
             if (removing) {
@@ -3768,7 +4140,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function toggleFavoriteFromBase(id) {
             const info = getBaseSongInfo(id);
             if (!info) return;
-            toggleFavoriteSong({ id, title: info.title, author: info.author, duration: info.duration, user: 'Favorite' });
+            const baseItem = getBasePoolItems().find(item => item.key === getSongKey(id));
+            toggleFavoriteSong({ ...info, user: 'Favorite', queueOrigin: baseItem ? baseItem.queueOrigin : 'playlist' });
         }
 
         function toggleFavoriteFromQueue(index) {
@@ -3785,7 +4158,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function addBaseSongToQueue(id) {
             const info = getBaseSongInfo(id);
             if (!info) return;
-            addSongFromChat({ id, title: info.title, author: info.author, duration: info.duration, user: 'Streamer' });
+            const baseItem = getBasePoolItems().find(item => item.key === getSongKey(id));
+            addSongFromChat({ ...info, user: 'Streamer', queueOrigin: baseItem ? baseItem.queueOrigin : 'playlist' });
         }
 
         function normalizeViewerHistoryEntry(entry) {
@@ -3808,6 +4182,13 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             return {
                 id: normalized.id,
+                source: normalized.source,
+                youtubeId: normalized.youtubeId,
+                spotifyId: normalized.spotifyId,
+                spotifyUri: normalized.spotifyUri,
+                spotifyUrl: normalized.spotifyUrl,
+                youtubeFallbackId: normalized.youtubeFallbackId,
+                thumbnail: normalized.thumbnail,
                 title: normalized.title,
                 author: normalized.author,
                 duration: normalized.duration,
@@ -3827,8 +4208,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 if (!Array.isArray(parsed)) return [];
                 const seen = new Set();
                 return parsed.map(normalizeViewerHistoryEntry).filter(entry => {
-                    if (!entry || seen.has(entry.id)) return false;
-                    seen.add(entry.id);
+                    const key = getSongKey(entry);
+                    if (!entry || seen.has(key)) return false;
+                    seen.add(key);
                     return true;
                 }).slice(0, VIEWER_HISTORY_LIMIT);
             } catch (error) {
@@ -3839,11 +4221,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function hydrateViewerHistoryTitleCache() {
             viewerSongHistory.forEach(song => {
                 if (!song || !song.id) return;
-                titleCache[song.id] = {
-                    title: song.title,
-                    author: song.author,
-                    duration: song.duration
-                };
+                cacheSongInfo(song);
             });
         }
 
@@ -3875,7 +4253,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             const now = new Date().toISOString();
             const requestUser = String(song.user || 'Viewer').trim() || 'Viewer';
-            const existingIndex = viewerSongHistory.findIndex(entry => entry.id === normalized.id);
+            const normalizedKey = getSongKey(normalized);
+            const existingIndex = viewerSongHistory.findIndex(entry => getSongKey(entry) === normalizedKey);
 
             if (existingIndex !== -1) {
                 const existing = viewerSongHistory.splice(existingIndex, 1)[0];
@@ -3995,37 +4374,45 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 const title = escapeHtml(entry.title || 'Unknown Title');
                 const dateLabel = escapeHtml(formatViewerHistoryDate(entry.lastRequestedAt || entry.addedAt));
                 const countLabel = t('ui_history_count', { count: entry.requestCount || 1 });
+                const songKey = getSongKey(entry);
+                const thumbnail = escapeHtml(getSongThumbnail(entry));
+                const source = getSongSource(entry);
+                const sourceLabel = escapeHtml(getSongSourceLabel(entry));
+                const sourceIcon = escapeHtml(getSongSourceIcon(entry));
+                const chatSourceClass = getSongChatSourceClass(entry);
+                const sourceClass = ` source-${source}`;
 
                 return `
-                <div class="q-item compact request history-item">
+                <div class="q-item compact request history-item${chatSourceClass}${sourceClass}">
                     <div class="track-num">${index + 1}.</div>
-                    <img src="https://i.ytimg.com/vi/${entry.id}/default.jpg">
+                    <img src="${thumbnail}">
                     <div class="track-info">
                         <div class="track-title" title="${title}">${title}</div>
+                        <span class="badge badge-time track-time-badge">${formatTime(entry.duration)}</span>
                         <div class="track-meta">
-                            <span class="badge badge-time">${formatTime(entry.duration)}</span>
-                            <span class="badge badge-user">${userLabel}</span>
-                            <span class="badge badge-author">${author}</span>
+                            <span class="badge badge-source badge-source-${source}" title="${sourceLabel}" aria-label="${sourceLabel}">${sourceIcon}</span>
+                            <span class="badge badge-user">${getSongRequesterHtml(entry.lastUser || entry.user || 'Viewer')}</span>
+                            <span class="badge badge-author">&#127908; ${author}</span>
                             <span class="badge badge-date">${dateLabel}</span>
                             <span class="badge badge-count">${escapeHtml(countLabel)}</span>
                         </div>
                     </div>
-                    ${renderFavoriteButton(entry.id, `toggleFavoriteFromHistory('${entry.id}')`)}
-                    <button class="btn-add" onclick="addHistorySongToQueue('${entry.id}')" title="${escapeHtml(t('ui_history_add_to_queue'))}">+</button>
+                    ${renderFavoriteButton(entry, `data-favorite-action="history" data-song-key="${escapeHtml(songKey)}"`)}
+                    <button type="button" class="btn-add" draggable="false" data-add-song-action="history" data-song-key="${escapeHtml(songKey)}" title="${escapeHtml(t('ui_history_add_to_queue'))}">+</button>
                 </div>`;
             }).join('');
         }
 
         function toggleFavoriteFromHistory(id) {
-            const entry = viewerSongHistory.find(song => song.id === id);
+            const entry = viewerSongHistory.find(song => getSongKey(song) === getSongKey(id));
             if (!entry) return;
             toggleFavoriteSong(entry);
         }
 
         function addHistorySongToQueue(id) {
-            const entry = viewerSongHistory.find(song => song.id === id);
+            const entry = viewerSongHistory.find(song => getSongKey(song) === getSongKey(id));
             if (!entry) return;
-            addSongFromChat({ id: entry.id, title: entry.title, author: entry.author, duration: entry.duration, user: 'Streamer' });
+            addSongFromChat({ ...entry, user: 'Streamer', queueOrigin: 'manual' });
         }
 
         function clearViewerHistoryWithConfirm() {
@@ -4069,11 +4456,17 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     }
                 }
 
-                if (currentSongInfo && player && player.cueVideoById) {
+                if (currentSongInfo && isSpotifySong(currentSongInfo)) {
+                    initialSongLoaded = true;
+                    renderPlayerSurface(currentSongInfo);
+                    document.getElementById('now-playing-title').innerText = currentSongInfo.title;
+                    setNowPlayingMeta(currentSongInfo);
+                    if (canTryNativeSpotifyPlayback()) initSpotifyPlayer().catch(() => {});
+                } else if (currentSongInfo && player && player.cueVideoById) {
                     initialSongLoaded = true;
                     player.cueVideoById(currentSongInfo.id);
                     document.getElementById('now-playing-title').innerText = currentSongInfo.title;
-                    document.getElementById('now-playing-meta').innerText = currentSongInfo.user === 'Auto' ? 'Auto' : currentSongInfo.user;
+                    setNowPlayingMeta(currentSongInfo);
                 }
                 renderQueue();
                 return true;
@@ -4145,7 +4538,12 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 'ytm_ws_host',
                 'ytm_ws_port',
                 'ytm_ws_pass',
+                SPOTIFY_CLIENT_ID_KEY,
+                SPOTIFY_ENABLED_KEY,
+                PLAYER_VOLUME_STORAGE_KEY,
                 'ytm_persist_queue',
+                SR_REMEMBER_STATE_STORAGE_KEY,
+                SR_ENABLED_STORAGE_KEY,
                 QUEUE_STORAGE_KEY,
                 FAVORITE_SONGS_STORAGE_KEY,
                 VIEWER_HISTORY_STORAGE_KEY,
@@ -4161,6 +4559,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 WIDGET_LAYOUT_REVISION_KEY,
                 WIDGET_LAYOUT_PRESETS_STORAGE_KEY,
                 WIDGET_EDITOR_SNAP_STORAGE_KEY,
+                APP_THEME_STORAGE_KEY,
                 'ytm_base_playlists',
                 'ytm_banned_songs',
                 'ytm_tutorial_seen'
@@ -4219,7 +4618,12 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 'ytm_ws_host',
                 'ytm_ws_port',
                 'ytm_ws_pass',
+                SPOTIFY_CLIENT_ID_KEY,
+                SPOTIFY_ENABLED_KEY,
+                PLAYER_VOLUME_STORAGE_KEY,
                 'ytm_persist_queue',
+                SR_REMEMBER_STATE_STORAGE_KEY,
+                SR_ENABLED_STORAGE_KEY,
                 QUEUE_STORAGE_KEY,
                 FAVORITE_SONGS_STORAGE_KEY,
                 VIEWER_HISTORY_STORAGE_KEY,
@@ -4235,6 +4639,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 WIDGET_LAYOUT_REVISION_KEY,
                 WIDGET_LAYOUT_PRESETS_STORAGE_KEY,
                 WIDGET_EDITOR_SNAP_STORAGE_KEY,
+                APP_THEME_STORAGE_KEY,
                 'ytm_base_playlists',
                 'ytm_banned_songs',
                 'ytm_tutorial_seen'
@@ -4574,6 +4979,698 @@ if (!WIDGET_EDITOR_PREVIEW) {
             else { input.type = 'password'; btn.innerText = t('ui_api_show'); }
         }
 
+        function getSpotifyRedirectUri() {
+            try {
+                const url = new URL(window.location.href);
+                if (url.hostname.toLowerCase() === 'localhost') url.hostname = '127.0.0.1';
+                url.search = '';
+                url.hash = '';
+                return url.toString();
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function hasSpotifyToken() {
+            return !!spotifyAccessToken && spotifyTokenExpiresAt > Date.now() + 30000;
+        }
+
+        function suspendSpotifyRuntime() {
+            clearSpotifyPlaybackMonitor();
+            if (spotifyPlayer) {
+                try { spotifyPlayer.disconnect(); } catch (error) {}
+            }
+            spotifyPlayer = null;
+            spotifyDeviceId = '';
+            spotifyPlayerReady = false;
+            spotifyPlaybackState = null;
+            spotifyTrackEndHandled = false;
+        }
+
+        function handleSpotifyEnabledToggle() {
+            const input = document.getElementById('spotify-enabled-cb');
+            SPOTIFY_ENABLED = !!(input && input.checked);
+            localStorage.setItem(SPOTIFY_ENABLED_KEY, SPOTIFY_ENABLED ? 'true' : 'false');
+
+            if (!SPOTIFY_ENABLED) {
+                suspendSpotifyRuntime();
+                spotifyLastError = '';
+                showToast(t('ui_spotify_disabled_short'), 'warn');
+            } else {
+                showToast(t('ui_spotify_enabled_short'), 'ok');
+                if (canTryNativeSpotifyPlayback()) initSpotifyPlayer().catch(() => {});
+            }
+
+            renderSpotifyStatus();
+        }
+
+        function renderSpotifyStatus(messageKey = '') {
+            const settingsRow = document.getElementById('spotify-settings-row');
+            const settingsContent = document.getElementById('spotify-settings-content');
+            const enabledInput = document.getElementById('spotify-enabled-cb');
+            const statusEl = document.getElementById('spotify-status-ui');
+            const connectBtn = document.getElementById('btn-spotify-connect');
+            const disconnectBtn = document.getElementById('btn-spotify-disconnect');
+            const clientIdInput = document.getElementById('spotify-client-id-input');
+            const redirectInput = document.getElementById('spotify-redirect-uri-output');
+
+            if (enabledInput) enabledInput.checked = SPOTIFY_ENABLED;
+            if (clientIdInput && clientIdInput.value !== SPOTIFY_CLIENT_ID) clientIdInput.value = SPOTIFY_CLIENT_ID;
+            if (redirectInput) redirectInput.value = getSpotifyRedirectUri();
+
+            if (settingsRow) settingsRow.classList.toggle('is-disabled', !SPOTIFY_ENABLED);
+            if (settingsContent) {
+                settingsContent.setAttribute('aria-disabled', SPOTIFY_ENABLED ? 'false' : 'true');
+                settingsContent.querySelectorAll('input, button').forEach(control => {
+                    control.disabled = !SPOTIFY_ENABLED;
+                });
+            }
+            if (connectBtn) connectBtn.disabled = !SPOTIFY_ENABLED || !SPOTIFY_CLIENT_ID;
+            if (disconnectBtn) disconnectBtn.disabled = !SPOTIFY_ENABLED || (!spotifyAccessToken && !spotifyRefreshToken);
+
+            if (!statusEl) return;
+
+            let key = messageKey;
+            if (!SPOTIFY_ENABLED) {
+                key = 'ui_spotify_status_disabled';
+            } else if (!key) {
+                if (!SPOTIFY_CLIENT_ID) key = 'ui_spotify_status_missing_client';
+                else if (spotifyLastError) key = 'ui_spotify_status_error';
+                else if (spotifyPlayerReady) key = 'ui_spotify_status_ready';
+                else if (spotifyAccessToken || spotifyRefreshToken) key = 'ui_spotify_status_connected';
+                else key = 'ui_spotify_status_disconnected';
+            }
+
+            statusEl.innerText = t(key, { error: spotifyLastError || '-' });
+            statusEl.classList.toggle('is-ok', key === 'ui_spotify_status_ready' || key === 'ui_spotify_status_connected');
+            statusEl.classList.toggle('is-error', key === 'ui_spotify_status_error' || key === 'ui_spotify_status_missing_client');
+            statusEl.classList.toggle('is-disabled', key === 'ui_spotify_status_disabled');
+        }
+
+        function saveSpotifyConfig() {
+            if (!SPOTIFY_ENABLED) return;
+            const input = document.getElementById('spotify-client-id-input');
+            SPOTIFY_CLIENT_ID = input ? input.value.trim() : SPOTIFY_CLIENT_ID;
+            if (SPOTIFY_CLIENT_ID) localStorage.setItem(SPOTIFY_CLIENT_ID_KEY, SPOTIFY_CLIENT_ID);
+            else localStorage.removeItem(SPOTIFY_CLIENT_ID_KEY);
+            renderSpotifyStatus();
+            showToast(t('ui_spotify_saved'), 'ok');
+        }
+
+        function clearSpotifyTokens() {
+            spotifyAccessToken = '';
+            spotifyRefreshToken = '';
+            spotifyTokenExpiresAt = 0;
+            spotifyDeviceId = '';
+            spotifyPlayerReady = false;
+            spotifyPlaybackState = null;
+            localStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+            localStorage.removeItem(SPOTIFY_REFRESH_TOKEN_KEY);
+            localStorage.removeItem(SPOTIFY_TOKEN_EXPIRES_KEY);
+        }
+
+        function disconnectSpotify() {
+            suspendSpotifyRuntime();
+            clearSpotifyTokens();
+            spotifyLastError = '';
+            renderSpotifyStatus();
+            showToast(t('ui_spotify_disconnected'), 'warn');
+        }
+
+        function spotifyBase64Url(buffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        function generateSpotifyCodeVerifier() {
+            const bytes = new Uint8Array(64);
+            crypto.getRandomValues(bytes);
+            return spotifyBase64Url(bytes);
+        }
+
+        async function createSpotifyCodeChallenge(verifier) {
+            const data = new TextEncoder().encode(verifier);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return spotifyBase64Url(digest);
+        }
+
+        async function connectSpotify() {
+            if (!SPOTIFY_ENABLED) {
+                showToast(t('ui_spotify_disabled_short'), 'warn');
+                return;
+            }
+            saveSpotifyConfig();
+            if (!SPOTIFY_CLIENT_ID) {
+                showToast(t('ui_spotify_client_required'), 'error');
+                return;
+            }
+            if (!/^https?:$/i.test(window.location.protocol)) {
+                showToast(t('ui_spotify_http_required'), 'error', 9000);
+                return;
+            }
+
+            const verifier = generateSpotifyCodeVerifier();
+            const challenge = await createSpotifyCodeChallenge(verifier);
+            const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            localStorage.setItem(SPOTIFY_CODE_VERIFIER_KEY, verifier);
+            localStorage.setItem(SPOTIFY_AUTH_STATE_KEY, state);
+
+            const params = new URLSearchParams({
+                response_type: 'code',
+                client_id: SPOTIFY_CLIENT_ID,
+                scope: SPOTIFY_SCOPES.join(' '),
+                redirect_uri: getSpotifyRedirectUri(),
+                state,
+                code_challenge_method: 'S256',
+                code_challenge: challenge
+            });
+
+            window.location.href = 'https://accounts.spotify.com/authorize?' + params.toString();
+        }
+
+        async function exchangeSpotifyCode(code) {
+            const verifier = localStorage.getItem(SPOTIFY_CODE_VERIFIER_KEY) || '';
+            if (!SPOTIFY_CLIENT_ID || !verifier) throw new Error('Missing Spotify verifier');
+
+            const body = new URLSearchParams({
+                client_id: SPOTIFY_CLIENT_ID,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: getSpotifyRedirectUri(),
+                code_verifier: verifier
+            });
+
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error_description || data.error || 'Spotify token error');
+            storeSpotifyTokenResponse(data);
+        }
+
+        function storeSpotifyTokenResponse(data) {
+            spotifyAccessToken = data.access_token || spotifyAccessToken;
+            spotifyRefreshToken = data.refresh_token || spotifyRefreshToken;
+            spotifyTokenExpiresAt = Date.now() + (Math.max(60, Number(data.expires_in) || 3600) * 1000);
+            if (spotifyAccessToken) localStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, spotifyAccessToken);
+            if (spotifyRefreshToken) localStorage.setItem(SPOTIFY_REFRESH_TOKEN_KEY, spotifyRefreshToken);
+            localStorage.setItem(SPOTIFY_TOKEN_EXPIRES_KEY, String(spotifyTokenExpiresAt));
+        }
+
+        async function refreshSpotifyTokenIfNeeded(force = false) {
+            if (!SPOTIFY_ENABLED) throw new Error('Spotify integration disabled');
+            if (!force && hasSpotifyToken()) return spotifyAccessToken;
+            if (!SPOTIFY_CLIENT_ID || !spotifyRefreshToken) throw new Error('Spotify authorization required');
+
+            const body = new URLSearchParams({
+                client_id: SPOTIFY_CLIENT_ID,
+                grant_type: 'refresh_token',
+                refresh_token: spotifyRefreshToken
+            });
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error_description || data.error || 'Spotify refresh error');
+            storeSpotifyTokenResponse(data);
+            return spotifyAccessToken;
+        }
+
+        async function handleSpotifyAuthCallback() {
+            let url;
+            try { url = new URL(window.location.href); } catch (error) { return; }
+            const code = url.searchParams.get('code');
+            const error = url.searchParams.get('error');
+            const state = url.searchParams.get('state');
+            if (!code && !error) return;
+
+            // Spotify requires a loopback IP instead of localhost. When the app was
+            // opened on localhost, relay the callback back to that origin so its
+            // PKCE verifier and saved settings remain available.
+            const localAuthState = localStorage.getItem(SPOTIFY_AUTH_STATE_KEY) || '';
+            if (url.hostname === '127.0.0.1' && !localAuthState) {
+                url.hostname = 'localhost';
+                window.location.replace(url.toString());
+                return;
+            }
+
+            url.searchParams.delete('code');
+            url.searchParams.delete('state');
+            url.searchParams.delete('error');
+            window.history.replaceState({}, document.title, url.toString());
+
+            if (error) {
+                spotifyLastError = error;
+                renderSpotifyStatus('ui_spotify_status_error');
+                showToast(t('ui_spotify_auth_failed', { error }), 'error', 9000);
+                return;
+            }
+
+            const expectedState = localStorage.getItem(SPOTIFY_AUTH_STATE_KEY) || '';
+            localStorage.removeItem(SPOTIFY_AUTH_STATE_KEY);
+            if (!state || state !== expectedState) {
+                spotifyLastError = 'Invalid OAuth state';
+                renderSpotifyStatus('ui_spotify_status_error');
+                showToast(t('ui_spotify_auth_failed', { error: spotifyLastError }), 'error', 9000);
+                return;
+            }
+
+            try {
+                await exchangeSpotifyCode(code);
+                localStorage.removeItem(SPOTIFY_CODE_VERIFIER_KEY);
+                spotifyLastError = '';
+                renderSpotifyStatus('ui_spotify_status_connected');
+                showToast(t('ui_spotify_connected'), 'ok');
+                initSpotifyPlayer().catch(() => {});
+            } catch (authError) {
+                spotifyLastError = authError.message || String(authError);
+                renderSpotifyStatus('ui_spotify_status_error');
+                showToast(t('ui_spotify_auth_failed', { error: spotifyLastError }), 'error', 9000);
+            }
+        }
+
+        async function spotifyApi(path, options = {}) {
+            if (!SPOTIFY_ENABLED) throw new Error('Spotify integration disabled');
+            const token = await refreshSpotifyTokenIfNeeded();
+            const response = await fetch('https://api.spotify.com/v1' + path, {
+                ...options,
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            });
+            if (response.status === 204) return null;
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : null;
+            if (!response.ok) {
+                const message = data && data.error ? (data.error.message || data.error.status || JSON.stringify(data.error)) : response.statusText;
+                const error = new Error(message || 'Spotify API error');
+                error.status = response.status;
+                throw error;
+            }
+            return data;
+        }
+
+        function parseSpotifyUrl(input) {
+            const value = String(input || '').trim();
+            let match = value.match(/^spotify:(track|playlist):([A-Za-z0-9]+)$/i);
+            if (match) return { type: match[1].toLowerCase(), id: match[2], url: value };
+            match = value.match(/open\.spotify\.com\/(track|playlist)\/([A-Za-z0-9]+)/i);
+            if (match) return { type: match[1].toLowerCase(), id: match[2], url: value };
+            return null;
+        }
+
+        function mapSpotifyTrack(track, user = 'Auto') {
+            if (!track || !track.id) return null;
+            const artists = Array.isArray(track.artists) ? track.artists.map(artist => artist.name).filter(Boolean).join(', ') : 'Spotify';
+            const image = track.album && Array.isArray(track.album.images) && track.album.images.length ? track.album.images[0].url : '';
+            return normalizeSongForStorage({
+                id: track.id,
+                source: SONG_SOURCE_SPOTIFY,
+                spotifyId: track.id,
+                spotifyUri: track.uri || ('spotify:track:' + track.id),
+                spotifyUrl: track.external_urls && track.external_urls.spotify ? track.external_urls.spotify : ('https://open.spotify.com/track/' + track.id),
+                thumbnail: image,
+                title: track.name || 'Spotify Track',
+                author: artists || 'Spotify',
+                duration: Math.round((Number(track.duration_ms) || 210000) / 1000),
+                user
+            });
+        }
+
+        async function fetchSpotifyTrackById(trackId, user = 'Auto') {
+            const data = await spotifyApi('/tracks/' + encodeURIComponent(trackId));
+            return mapSpotifyTrack(data, user);
+        }
+
+        async function fetchSpotifyOembedTrack(url, user = 'Auto') {
+            const response = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url));
+            if (!response.ok) throw new Error('Spotify oEmbed unavailable');
+            const data = await response.json();
+            const parsed = parseSpotifyUrl(url);
+            return normalizeSongForStorage({
+                id: parsed ? parsed.id : url,
+                source: SONG_SOURCE_SPOTIFY,
+                spotifyId: parsed ? parsed.id : '',
+                spotifyUri: parsed ? 'spotify:track:' + parsed.id : '',
+                spotifyUrl: url,
+                thumbnail: data.thumbnail_url || '',
+                title: data.title || 'Spotify Track',
+                author: data.author_name || 'Spotify',
+                duration: 210,
+                user
+            });
+        }
+
+        async function fetchSpotifyPlaylistMeta(playlistId) {
+            return spotifyApi('/playlists/' + encodeURIComponent(playlistId) + '?fields=id,name');
+        }
+
+        async function fetchSpotifyPlaylistTracks(playlistId) {
+            const tracks = [];
+            let path = '/playlists/' + encodeURIComponent(playlistId) + '/items?limit=50&market=from_token&additional_types=track';
+            while (path) {
+                const data = await spotifyApi(path);
+                (data.items || []).forEach(entry => {
+                    const track = entry && (entry.item || entry.track);
+                    if (!track || (track.type && track.type !== 'track')) return;
+                    const song = mapSpotifyTrack(track, 'Auto');
+                    if (song) tracks.push(song);
+                });
+                path = data.next ? data.next.replace('https://api.spotify.com/v1', '') : '';
+            }
+            return tracks;
+        }
+
+        function loadSpotifySdk() {
+            if (!SPOTIFY_ENABLED) return Promise.reject(new Error('Spotify integration disabled'));
+            if (window.Spotify && window.Spotify.Player) return Promise.resolve();
+            if (spotifySdkPromise) return spotifySdkPromise;
+
+            spotifySdkPromise = new Promise((resolve, reject) => {
+                const previousReady = window.onSpotifyWebPlaybackSDKReady;
+                window.onSpotifyWebPlaybackSDKReady = () => {
+                    if (typeof previousReady === 'function') previousReady();
+                    resolve();
+                };
+                const existing = document.querySelector('script[data-spotify-sdk]');
+                if (existing) return;
+                const script = document.createElement('script');
+                script.src = SPOTIFY_PLAYER_SDK_URL;
+                script.async = true;
+                script.dataset.spotifySdk = 'true';
+                script.onerror = () => reject(new Error('Spotify SDK failed to load'));
+                document.head.appendChild(script);
+            });
+
+            return spotifySdkPromise;
+        }
+
+        async function initSpotifyPlayer() {
+            if (!SPOTIFY_ENABLED) throw new Error('Spotify integration disabled');
+            if (spotifyPlayerReady && spotifyPlayer) return spotifyPlayer;
+            await refreshSpotifyTokenIfNeeded();
+            await loadSpotifySdk();
+
+            if (!spotifyPlayer) {
+                spotifyPlayer = new Spotify.Player({
+                    name: PROJECT_NAME,
+                    getOAuthToken: async callback => {
+                        try {
+                            const token = await refreshSpotifyTokenIfNeeded();
+                            callback(token);
+                        } catch (error) {
+                            spotifyLastError = error.message || String(error);
+                            renderSpotifyStatus('ui_spotify_status_error');
+                        }
+                    },
+                    volume: (PLAYER_VOLUME === null ? 80 : PLAYER_VOLUME) / 100
+                });
+
+                spotifyPlayer.addListener('ready', ({ device_id }) => {
+                    spotifyDeviceId = device_id;
+                    spotifyPlayerReady = true;
+                    spotifyLastError = '';
+                    renderSpotifyStatus('ui_spotify_status_ready');
+                });
+                spotifyPlayer.addListener('not_ready', () => {
+                    spotifyPlayerReady = false;
+                    renderSpotifyStatus();
+                });
+                spotifyPlayer.addListener('account_error', ({ message }) => {
+                    spotifyLastError = message || 'Spotify Premium required';
+                    renderSpotifyStatus('ui_spotify_status_error');
+                    showToast(t('ui_spotify_premium_required'), 'error', 9000);
+                });
+                spotifyPlayer.addListener('authentication_error', ({ message }) => {
+                    spotifyLastError = message || 'Spotify authentication error';
+                    clearSpotifyTokens();
+                    renderSpotifyStatus('ui_spotify_status_error');
+                });
+                spotifyPlayer.addListener('playback_error', ({ message }) => {
+                    spotifyLastError = message || 'Spotify playback error';
+                    renderSpotifyStatus('ui_spotify_status_error');
+                });
+                spotifyPlayer.addListener('player_state_changed', state => {
+                    spotifyPlaybackState = state;
+                    if (currentSongInfo && getSongSource(currentSongInfo) === SONG_SOURCE_SPOTIFY) updateNowPlayingProgress();
+                });
+            }
+
+            const connected = await spotifyPlayer.connect();
+            if (!connected) throw new Error('Spotify device could not connect');
+            await waitForSpotifyDevice();
+            return spotifyPlayer;
+        }
+
+        async function waitForSpotifyDevice(timeoutMs = 8000) {
+            const start = Date.now();
+            while (!spotifyPlayerReady || !spotifyDeviceId) {
+                if (Date.now() - start > timeoutMs) throw new Error('Spotify device is not ready');
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+        }
+
+        function clearSpotifyPlaybackMonitor() {
+            clearInterval(spotifyPlaybackMonitor);
+            spotifyPlaybackMonitor = null;
+        }
+
+        function startSpotifyPlaybackMonitor() {
+            clearSpotifyPlaybackMonitor();
+            spotifyPlaybackMonitor = setInterval(async () => {
+                if (!currentSongInfo || getSongSource(currentSongInfo) !== SONG_SOURCE_SPOTIFY || !spotifyPlayer) return;
+                try {
+                    const state = await spotifyPlayer.getCurrentState();
+                    if (!state) return;
+                    spotifyPlaybackState = state;
+                    const durationMs = state.duration || (currentSongInfo.duration || 0) * 1000;
+                    const positionMs = state.position || 0;
+                    if (!state.paused && durationMs > 0 && durationMs - positionMs <= 900 && !spotifyTrackEndHandled) {
+                        spotifyTrackEndHandled = true;
+                        setTimeout(() => {
+                            if (currentSongInfo && getSongSource(currentSongInfo) === SONG_SOURCE_SPOTIFY) playNext(playQueue.length === 0 ? 'shuffle' : basePlaybackMode);
+                        }, 900);
+                    }
+                    updateNowPlayingProgress();
+                } catch (error) {}
+            }, 700);
+        }
+
+        async function playSpotifySong(song) {
+            await initSpotifyPlayer();
+            if (PLAYER_VOLUME !== null && spotifyPlayer && spotifyPlayer.setVolume) {
+                await spotifyPlayer.setVolume(PLAYER_VOLUME / 100);
+            }
+            renderPlayerSurface(song);
+            if (player && player.stopVideo) {
+                try { player.stopVideo(); } catch (error) {}
+            }
+            if (spotifyPlayer && spotifyPlayer.activateElement) {
+                try { await spotifyPlayer.activateElement(); } catch (error) {}
+            }
+            spotifyTrackEndHandled = false;
+            await spotifyApi('/me/player/play?device_id=' + encodeURIComponent(spotifyDeviceId), {
+                method: 'PUT',
+                body: JSON.stringify({ uris: [song.spotifyUri || ('spotify:track:' + getSongIdentityId(song))] })
+            });
+            currentSongStopped = false;
+            nowPlayingWaveHoldUntilStart = false;
+            clearNowPlayingWaveEffect();
+            document.getElementById('now-playing-title').innerText = song.title;
+            setNowPlayingMeta(song);
+            startSpotifyPlaybackMonitor();
+            publishNowPlayingWidgetStartupBurst();
+        }
+
+        function activateSpotifyPlaybackElement() {
+            if (!spotifyPlayer || !spotifyPlayer.activateElement) return;
+            try {
+                const activation = spotifyPlayer.activateElement();
+                if (activation && typeof activation.catch === 'function') activation.catch(() => {});
+            } catch (error) {}
+        }
+
+        function getSpotifySongUri(song) {
+            if (!song) return '';
+            return song.spotifyUri || ('spotify:track:' + getSongIdentityId(song));
+        }
+
+        async function spotifyPlayerHasSong(song) {
+            if (!spotifyPlayer || !song) return false;
+            try {
+                const state = await spotifyPlayer.getCurrentState();
+                if (!state) return false;
+                spotifyPlaybackState = state;
+                const currentTrack = state.track_window && state.track_window.current_track;
+                return !!(currentTrack && (
+                    currentTrack.uri === getSpotifySongUri(song) ||
+                    String(currentTrack.id || '') === String(getSongIdentityId(song))
+                ));
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function pauseSpotifyPlayback() {
+            if (spotifyPlayer) {
+                try { await spotifyPlayer.pause(); } catch (error) {}
+            }
+        }
+
+        async function resumeSpotifyPlayback(song = currentSongInfo) {
+            if (!song) return;
+            await initSpotifyPlayer();
+
+            if (!(await spotifyPlayerHasSong(song))) {
+                await playSpotifySong(song);
+                return;
+            }
+
+            try {
+                if (spotifyPlayer.activateElement) await spotifyPlayer.activateElement();
+                await spotifyPlayer.resume();
+            } catch (error) {
+                await spotifyApi('/me/player/play?device_id=' + encodeURIComponent(spotifyDeviceId), { method: 'PUT' });
+            }
+        }
+
+        async function stopSpotifyPlayback() {
+            clearSpotifyPlaybackMonitor();
+            if (spotifyPlayer) {
+                try { await spotifyPlayer.pause(); } catch (error) {}
+            }
+        }
+
+        function getSpotifyPlaybackTiming() {
+            const state = spotifyPlaybackState;
+            const duration = state && state.duration ? Math.floor(state.duration / 1000) : (currentSongInfo ? currentSongInfo.duration || 0 : 0);
+            const currentTime = state && Number.isFinite(state.position) ? Math.floor(state.position / 1000) : 0;
+            const isPlaying = !!(state && !state.paused);
+            return { duration, currentTime, isPlaying, playerState: isPlaying ? 1 : 2 };
+        }
+
+        async function fetchYoutubeSongById(videoId, user = 'Streamer') {
+            if (!checkApiSetup()) return null;
+            let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${API_KEY}`;
+            let res = await fetch(url);
+            let data = await res.json();
+            if (data.error || !data.items || data.items.length === 0) return null;
+            let item = data.items[0];
+            return normalizeSongForStorage({
+                id: videoId,
+                source: SONG_SOURCE_YOUTUBE,
+                user,
+                title: item.snippet.title,
+                author: cleanAuthorName(item.snippet.channelTitle),
+                duration: parseISO8601Duration(item.contentDetails.duration)
+            });
+        }
+
+        async function fetchYoutubeSongByQuery(query, user = 'Streamer') {
+            if (!checkApiSetup()) return null;
+            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=1&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
+            if (searchData.error || !searchData.items || searchData.items.length === 0) return null;
+            const videoId = searchData.items[0].id && searchData.items[0].id.videoId;
+            if (!videoId) return null;
+            return fetchYoutubeSongById(videoId, user);
+        }
+
+        async function fallbackSpotifySongToYoutube(spotifySong, options = {}) {
+            const query = [spotifySong.title, spotifySong.author].filter(Boolean).join(' ');
+            const youtubeSong = await fetchYoutubeSongByQuery(query, spotifySong.user || 'Streamer');
+            if (!youtubeSong) {
+                if (spotifySong.user !== 'Streamer') sendChatMessage(t('msg_spotify_unavailable', { user: spotifySong.user }));
+                return false;
+            }
+            youtubeSong.fallbackFromSpotify = true;
+            youtubeSong.spotifyId = spotifySong.spotifyId || spotifySong.id || '';
+            youtubeSong.spotifyUrl = spotifySong.spotifyUrl || '';
+            youtubeSong.queueOrigin = getSongQueueOrigin(spotifySong, 'manual');
+            if (options.playNow) {
+                currentSongInfo = youtubeSong;
+                playYoutubeSong(youtubeSong);
+                renderQueue();
+            } else {
+                addSongFromChat(youtubeSong, !!options.force);
+            }
+            if (spotifySong.user !== 'Streamer') {
+                sendChatMessage(t('msg_spotify_fallback', { user: spotifySong.user, title: spotifySong.title }));
+            }
+            return true;
+        }
+
+        function canTryNativeSpotifyPlayback() {
+            return !!(SPOTIFY_ENABLED && SPOTIFY_CLIENT_ID && (spotifyAccessToken || spotifyRefreshToken));
+        }
+
+        async function resolveSpotifyRequestSong(payload) {
+            const parsed = parseSpotifyUrl(payload.input || payload.spotifyUrl || payload.url || '');
+            const trackId = payload.spotifyId || payload.id || (parsed && parsed.type === 'track' ? parsed.id : '');
+            if (!trackId) return null;
+
+            if (spotifyAccessToken || spotifyRefreshToken) {
+                try {
+                    return await fetchSpotifyTrackById(trackId, payload.user || 'Viewer');
+                } catch (error) {
+                    spotifyLastError = error.message || String(error);
+                    renderSpotifyStatus('ui_spotify_status_error');
+                }
+            }
+
+            const spotifyUrl = payload.spotifyUrl || (parsed && parsed.url) || ('https://open.spotify.com/track/' + trackId);
+            try {
+                return await fetchSpotifyOembedTrack(spotifyUrl, payload.user || 'Viewer');
+            } catch (error) {
+                return normalizeSongForStorage({
+                    id: trackId,
+                    source: SONG_SOURCE_SPOTIFY,
+                    spotifyId: trackId,
+                    spotifyUri: 'spotify:track:' + trackId,
+                    spotifyUrl,
+                    title: payload.title || 'Spotify Track',
+                    author: payload.author || 'Spotify',
+                    duration: payload.duration || 210,
+                    user: payload.user || 'Viewer'
+                });
+            }
+        }
+
+        async function addSpotifyTrackRequest(payload, force = false) {
+            if (!SPOTIFY_ENABLED) {
+                if (payload.user !== 'Streamer') {
+                    sendChatMessage(t('msg_spotify_disabled', { user: payload.user || 'Viewer' }));
+                } else {
+                    showToast(t('ui_spotify_disabled_short'), 'warn', 9000);
+                }
+                return;
+            }
+            const song = await resolveSpotifyRequestSong(payload);
+            if (!song) {
+                if (payload.user !== 'Streamer') sendChatMessage(t('msg_spotify_unavailable', { user: payload.user || 'Viewer' }));
+                return;
+            }
+
+            if (!canTryNativeSpotifyPlayback()) {
+                const fallbackDone = await fallbackSpotifySongToYoutube(song, { force });
+                if (!fallbackDone && payload.user !== 'Streamer') {
+                    sendChatMessage(t('msg_spotify_connect_required', { user: payload.user || 'Viewer' }));
+                }
+                return;
+            }
+
+            addSongFromChat(song, force);
+        }
+
         function updateTutLink() {
             let hp = document.getElementById('tut-http-port').value.trim() || '7474';
             let folder = document.getElementById('tut-folder').value.trim() || 'betterSongRequest';
@@ -4585,7 +5682,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             let url = `http://localhost:${hp}/${finalFolder}index.html`;
             let a = document.getElementById('tut-final-link');
             if(a) { a.href = url; a.innerText = url; }
-            
+
             let doneTextEl = document.getElementById('tut-done-text');
             let closeBtn = document.getElementById('tut-close-btn');
             
@@ -4640,18 +5737,53 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
         let savedPlaylists = JSON.parse(localStorage.getItem('ytm_base_playlists')) || [];
         if (savedPlaylists.length === 0) {
-            savedPlaylists = [{ id: 'PL9O6SbAVrliMxCJ-40pYLNZHXFYYZ5SiC', title: 'default_ytm' }];
+            savedPlaylists = [{ id: 'PL9O6SbAVrliMxCJ-40pYLNZHXFYYZ5SiC', source: SONG_SOURCE_YOUTUBE, title: 'default_ytm' }];
             localStorage.setItem('ytm_base_playlists', JSON.stringify(savedPlaylists));
+        } else {
+            savedPlaylists = savedPlaylists.map(playlist => ({
+                ...playlist,
+                source: playlist.source === SONG_SOURCE_SPOTIFY ? SONG_SOURCE_SPOTIFY : SONG_SOURCE_YOUTUBE
+            }));
         }
 
         async function addBasePlaylist() {
+            const url = document.getElementById('base-playlist-url').value;
+            const spotify = parseSpotifyUrl(url);
+            if (spotify && spotify.type === 'playlist') {
+                if (!SPOTIFY_ENABLED) {
+                    showToast(t('ui_spotify_disabled_short'), 'warn', 9000);
+                    openSettings();
+                    return;
+                }
+                if (!spotifyAccessToken && !spotifyRefreshToken) {
+                    showToast(t('ui_spotify_connect_required_short'), 'error', 9000);
+                    openSettings();
+                    return;
+                }
+                const pid = spotify.id;
+                if (!savedPlaylists.some(p => p.id === pid && p.source === SONG_SOURCE_SPOTIFY)) {
+                    document.getElementById('base-playlist-url').value = "...";
+                    try {
+                        const meta = await fetchSpotifyPlaylistMeta(pid);
+                        savedPlaylists.push({ id: pid, source: SONG_SOURCE_SPOTIFY, title: meta.name || `Spotify: ${pid}` });
+                        localStorage.setItem('ytm_base_playlists', JSON.stringify(savedPlaylists));
+                        document.getElementById('base-playlist-url').value = "";
+                        renderPlaylistManager();
+                        fetchFullPlaylistFromAPI();
+                    } catch (e) {
+                        document.getElementById('base-playlist-url').value = "";
+                        showToast(t('ui_spotify_playlist_error'), 'error', 9000);
+                    }
+                }
+                return;
+            }
+
             if (!checkApiSetup()) return;
 
-            const url = document.getElementById('base-playlist-url').value;
             const match = url.match(/[?&]list=([^#\&\?]+)/);
             if (match && match[1]) {
                 const pid = match[1];
-                if (!savedPlaylists.some(p => p.id === pid)) {
+                if (!savedPlaylists.some(p => p.id === pid && (p.source || SONG_SOURCE_YOUTUBE) === SONG_SOURCE_YOUTUBE)) {
                     document.getElementById('base-playlist-url').value = "...";
                     try {
                         let res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${pid}&key=${API_KEY}`);
@@ -4665,7 +5797,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
                         let title = (data.items && data.items.length > 0) ? data.items[0].snippet.title : `Playlist: ${pid}`;
                         
-                        savedPlaylists.push({ id: pid, title: title });
+                        savedPlaylists.push({ id: pid, source: SONG_SOURCE_YOUTUBE, title: title });
                         localStorage.setItem('ytm_base_playlists', JSON.stringify(savedPlaylists));
                         document.getElementById('base-playlist-url').value = "";
                         log(`📥 Added playlist: ${title}`);
@@ -4740,10 +5872,13 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
             container.innerHTML = savedPlaylists.map((p, i) => {
                 let displayTitle = (p.id === 'PL9O6SbAVrliMxCJ-40pYLNZHXFYYZ5SiC' && (p.title === 'default_ytm' || p.title.includes('Domyślna') || p.title.includes('Default'))) ? t('ui_default_playlist_name') : p.title;
+                let source = normalizeSongSource(p.source);
+                let sourceLabel = getSongSourceLabel(source);
+                let sourceIcon = getSongSourceIcon(source);
                 return `
                 <div class="modal-item playlist-style" draggable="true" data-index="${i}" ondragstart="handlePlaylistDragStart(event)" ondragover="handlePlaylistDragOver(event)" ondragleave="handlePlaylistDragLeave(event)" ondrop="handlePlaylistDrop(event)" ondragend="handlePlaylistDragEnd(event)">
                     <div class="playlist-order-handle" aria-hidden="true">☰</div>
-                    <div class="modal-item-title" title="${p.id}">🎵 ${displayTitle}</div>
+                    <div class="modal-item-title" title="${p.id}">🎵 ${escapeHtml(displayTitle)} <span class="badge badge-source badge-source-${source}" title="${escapeHtml(sourceLabel)}" aria-label="${escapeHtml(sourceLabel)}">${escapeHtml(sourceIcon)}</span></div>
                     <button class="btn-modal-action danger" draggable="false" onclick="removeBasePlaylist(${i})">${t('ui_remove')}</button>
                 </div>
             `}).join('');
@@ -4751,14 +5886,15 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
         let bannedSongs = JSON.parse(localStorage.getItem('ytm_banned_songs')) || [];
         if (bannedSongs.length > 0 && typeof bannedSongs[0] === 'string') {
-            bannedSongs = bannedSongs.map(id => ({ id: id, title: "Unknown (Banned earlier)" }));
+            bannedSongs = bannedSongs.map(id => ({ id: id, source: SONG_SOURCE_YOUTUBE, title: "Unknown (Banned earlier)" }));
             localStorage.setItem('ytm_banned_songs', JSON.stringify(bannedSongs));
         }
 
         function banCurrentSong() {
             if (!currentSongInfo) return;
-            if (!bannedSongs.some(b => b.id === currentSongInfo.id)) {
-                bannedSongs.push({ id: currentSongInfo.id, title: currentSongInfo.title }); 
+            const songKey = getSongKey(currentSongInfo);
+            if (!bannedSongs.some(b => getSongKey(b) === songKey)) {
+                bannedSongs.push({ id: currentSongInfo.id, source: getSongSource(currentSongInfo), title: currentSongInfo.title }); 
                 localStorage.setItem('ytm_banned_songs', JSON.stringify(bannedSongs)); 
                 log(`🔨 Banned current: ${currentSongInfo.title}`, "warn");
                 if (currentSongInfo.user !== "Streamer" && currentSongInfo.user !== "Auto") {
@@ -4770,8 +5906,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
         function banSong(index) {
             let song = playQueue[index];
-            if (!bannedSongs.some(b => b.id === song.id)) {
-                bannedSongs.push({ id: song.id, title: song.title }); 
+            const songKey = getSongKey(song);
+            if (!bannedSongs.some(b => getSongKey(b) === songKey)) {
+                bannedSongs.push({ id: song.id, source: getSongSource(song), title: song.title }); 
                 localStorage.setItem('ytm_banned_songs', JSON.stringify(bannedSongs)); 
                 log(`🔨 Banned: ${song.title}`, "warn");
                 if (song.user !== "Streamer" && song.user !== "Auto") {
@@ -4833,6 +5970,154 @@ if (!WIDGET_EDITOR_PREVIEW) {
             let m = parseInt(match[2]) || 0;
             let s = parseInt(match[3]) || 0;
             return (h * 3600) + (m * 60) + s;
+        }
+
+        function normalizeSongSource(source) {
+            const value = String(source || '').trim().toLowerCase();
+            return value === SONG_SOURCE_SPOTIFY ? SONG_SOURCE_SPOTIFY : SONG_SOURCE_YOUTUBE;
+        }
+
+        function getSongSource(song) {
+            return normalizeSongSource(song && (song.source || song.platform || song.provider));
+        }
+
+        function getSongIdentityId(song) {
+            if (!song) return '';
+            const source = getSongSource(song);
+            if (source === SONG_SOURCE_SPOTIFY) return String(song.spotifyId || song.id || '').trim();
+            return String(song.youtubeId || song.id || '').trim();
+        }
+
+        function getSongKeyFromParts(source, id) {
+            const normalizedSource = normalizeSongSource(source);
+            const cleanId = String(id || '').trim();
+            return cleanId ? normalizedSource + ':' + cleanId : '';
+        }
+
+        function getSongKey(songOrId, source = SONG_SOURCE_YOUTUBE) {
+            if (songOrId && typeof songOrId === 'object') return getSongKeyFromParts(getSongSource(songOrId), getSongIdentityId(songOrId));
+            const value = String(songOrId || '').trim();
+            if (!value) return '';
+            const prefixed = value.match(/^(youtube|spotify|yt):(.+)$/i);
+            if (prefixed) return getSongKeyFromParts(prefixed[1] === 'yt' ? SONG_SOURCE_YOUTUBE : prefixed[1], prefixed[2]);
+            return getSongKeyFromParts(source, value);
+        }
+
+        function getSongSourceLabel(songOrSource) {
+            const source = typeof songOrSource === 'string' ? normalizeSongSource(songOrSource) : getSongSource(songOrSource);
+            return source === SONG_SOURCE_SPOTIFY ? 'Spotify' : 'YouTube';
+        }
+
+        function getSongSourceIcon(songOrSource) {
+            const source = typeof songOrSource === 'string' ? normalizeSongSource(songOrSource) : getSongSource(songOrSource);
+            return source === SONG_SOURCE_SPOTIFY ? '\u266A' : '\u25B6';
+        }
+
+        function getSongRequesterLabel(songOrUser) {
+            const rawUser = songOrUser && typeof songOrUser === 'object' ? songOrUser.user : songOrUser;
+            const user = String(rawUser || 'Viewer').trim();
+            if (!user || user === 'Auto') return '\u{1F916} Auto';
+            return '\u{1F464} ' + user;
+        }
+
+        function getSongRequesterHtml(songOrUser) {
+            return escapeHtml(getSongRequesterLabel(songOrUser));
+        }
+
+        function setNowPlayingMeta(songOrUser) {
+            const metaEl = document.getElementById('now-playing-meta');
+            if (metaEl) metaEl.innerText = getSongRequesterLabel(songOrUser);
+        }
+
+        var nowPlayingTitleFitFrame = null;
+        var nowPlayingTitleResizeObserver = null;
+
+        function fitNowPlayingTitle() {
+            const titleEl = document.getElementById('now-playing-title');
+            if (!titleEl) return;
+
+            titleEl.style.fontSize = '';
+            const computed = window.getComputedStyle(titleEl);
+            let size = parseFloat(computed.fontSize) || 18;
+            const minSize = 10;
+            titleEl.style.fontSize = size + 'px';
+
+            let guard = 0;
+            while (titleEl.scrollWidth > titleEl.clientWidth && size > minSize && guard < 32) {
+                size -= 0.5;
+                titleEl.style.fontSize = size + 'px';
+                guard += 1;
+            }
+        }
+
+        function scheduleNowPlayingTitleFit() {
+            if (nowPlayingTitleFitFrame) cancelAnimationFrame(nowPlayingTitleFitFrame);
+            nowPlayingTitleFitFrame = requestAnimationFrame(() => {
+                nowPlayingTitleFitFrame = null;
+                fitNowPlayingTitle();
+            });
+        }
+
+        function setupNowPlayingTitleAutoFit() {
+            const titleEl = document.getElementById('now-playing-title');
+            if (!titleEl || titleEl.dataset.autofitBound === '1') return;
+            titleEl.dataset.autofitBound = '1';
+
+            new MutationObserver(scheduleNowPlayingTitleFit).observe(titleEl, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+
+            if (typeof ResizeObserver !== 'undefined') {
+                nowPlayingTitleResizeObserver = new ResizeObserver(scheduleNowPlayingTitleFit);
+                nowPlayingTitleResizeObserver.observe(titleEl);
+            }
+            window.addEventListener('resize', scheduleNowPlayingTitleFit);
+            scheduleNowPlayingTitleFit();
+        }
+
+        function getSongChatSource(song) {
+            const chatTarget = getSongChatTarget(song);
+            return chatTarget ? normalizeChatSource(chatTarget.chatSource, '') : '';
+        }
+
+        function getSongChatSourceClass(song) {
+            const chatSource = getSongChatSource(song);
+            return chatSource ? ` chat-source-${chatSource}` : '';
+        }
+
+        function getYoutubeThumbnail(id, quality = 'default') {
+            const videoId = String(id || '').trim();
+            if (!videoId) return '';
+            return 'https://i.ytimg.com/vi/' + encodeURIComponent(videoId) + '/' + quality + '.jpg';
+        }
+
+        function getSongThumbnail(song, quality = 'default') {
+            if (!song) return '';
+            if (getSongSource(song) === SONG_SOURCE_SPOTIFY) return song.thumbnail || FALLBACK_COVER_IMAGE;
+            return song.thumbnail || getYoutubeThumbnail(getSongIdentityId(song), quality) || FALLBACK_COVER_IMAGE;
+        }
+
+        function getSongLink(song) {
+            if (!song) return '';
+            if (getSongSource(song) === SONG_SOURCE_SPOTIFY) {
+                return song.spotifyUrl || ('https://open.spotify.com/track/' + encodeURIComponent(getSongIdentityId(song)));
+            }
+            return 'https://youtu.be/' + encodeURIComponent(getSongIdentityId(song));
+        }
+
+        function jsString(value) {
+            return JSON.stringify(String(value || ''));
+        }
+
+        function cacheSongInfo(song) {
+            const normalized = normalizeSongForStorage(song);
+            if (!normalized) return '';
+            const key = getSongKey(normalized);
+            titleCache[key] = normalized;
+            if (getSongSource(normalized) === SONG_SOURCE_YOUTUBE) titleCache[normalized.id] = normalized;
+            return key;
         }
 
         function escapeHtml(value) {
@@ -4916,13 +6201,24 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function applyCoverThemeToNowPlayingCard(card, src) {
-            if (!card || !src) return;
+            if (!card) return;
+            if (!src) {
+                card.style.removeProperty('--np-cover-image');
+                return;
+            }
             card.dataset.coverThemeSrc = src;
+            card.dataset.coverTheme = 'loading';
+            card.style.setProperty('--np-cover-image', 'url(' + JSON.stringify(String(src)) + ')');
 
             readAverageCoverColor(src).then(color => {
                 if (card.dataset.coverThemeSrc !== src) return;
+                const luma = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
                 card.style.setProperty('--np-cover-rgb', color.r + ', ' + color.g + ', ' + color.b);
-            }).catch(() => {});
+                card.style.setProperty('--np-cover-contrast-rgb', luma > 145 ? '18, 21, 22' : '255, 244, 221');
+                card.dataset.coverTheme = 'ready';
+            }).catch(() => {
+                if (card.dataset.coverThemeSrc === src) card.dataset.coverTheme = 'image';
+            });
         }
 
         function getNowPlayingWaveBarHeight(index) {
@@ -4988,13 +6284,18 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const prefix = options.prefix || 'now-playing';
             const dropAttrs = options.dropTarget ? 'ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"' : '';
             const banButton = options.showBan ? '<button class="np-card-ban" onclick="banCurrentSong()" title="Ban">&#128296;</button>' : '';
-            const favoriteButton = options.showFavorite ? renderFavoriteButton(song.id, 'toggleFavoriteFromCurrentSong()').replace('btn-favorite', 'btn-favorite np-card-favorite') : '';
+            const favoriteButton = options.showFavorite ? renderFavoriteButton(song, 'data-favorite-action="current"').replace('btn-favorite', 'btn-favorite np-card-favorite') : '';
             const title = escapeHtml(song.title || 'Unknown Title');
             const author = escapeHtml(cleanAuthorName(song.author || 'YouTube'));
-            const user = song.user === 'Auto' ? 'Auto' : escapeHtml(song.user || 'Viewer');
-            const thumbnail = 'https://i.ytimg.com/vi/' + escapeHtml(song.id) + '/mqdefault.jpg';
+            const user = getSongRequesterHtml(song);
+            const thumbnail = escapeHtml(getSongThumbnail(song, 'mqdefault'));
+            const source = getSongSource(song);
+            const sourceLabel = escapeHtml(getSongSourceLabel(song));
+            const sourceIcon = escapeHtml(getSongSourceIcon(song));
+            const chatSourceClass = getSongChatSourceClass(song);
+            const requesterClass = String(song.user || 'Auto') === 'Auto' ? ' requester-auto' : '';
 
-            return '<div id="' + prefix + '-card" class="now-playing-card ' + (options.className || '') + '" ' + dropAttrs + '>' +
+            return '<div id="' + prefix + '-card" class="now-playing-card ' + (options.className || '') + chatSourceClass + '" ' + dropAttrs + '>' +
                 '<img class="np-card-cover" data-widget-element="cover" src="' + thumbnail + '" alt="">' +
                 '<div class="np-card-info-bg" data-widget-element="infoBackground" aria-hidden="true"></div>' +
                 '<div class="np-card-meter-bg" data-widget-element="meterBackground" aria-hidden="true"></div>' +
@@ -5009,7 +6310,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
                         '<span id="' + prefix + '-duration" class="np-card-time" data-widget-element="duration">' + formatTime(song.duration || 0) + '</span>' +
                     '</div>' +
                 '</div>' +
-                '<span class="np-card-user" data-widget-element="requester">' + user + '</span>' +
+                '<span class="np-card-source badge-source-' + source + '" title="' + sourceLabel + '" aria-label="' + sourceLabel + '">' + sourceIcon + '</span>' +
+                '<span class="np-card-user' + requesterClass + '" data-widget-element="requester">' + user + '</span>' +
                 favoriteButton +
                 banButton +
                 '<div class="np-card-progress" data-widget-element="progress"><div id="' + prefix + '-progress" class="np-card-progress-fill"></div></div>' +
@@ -5019,36 +6321,40 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function getNowPlayingWidgetState(options = {}) {
             if (!options.ignoreWidgetTestState && widgetTestState) {
                 if (Date.now() < widgetTestStateUntil) {
-                    return { ...widgetTestState, updatedAt: Date.now() };
+                    return { ...widgetTestState, srEnabled: isSrEnabled, updatedAt: Date.now() };
                 }
                 widgetTestState = null;
             }
 
             if (!currentSongInfo || currentSongStopped) {
-                return { type: 'NOW_PLAYING_STATE', hasSong: false, currentTime: 0, duration: 0, progress: 0, isPlaying: false, isStopped: !!currentSongStopped, waveHold: false, updatedAt: Date.now() };
+                return { type: 'NOW_PLAYING_STATE', hasSong: false, currentTime: 0, duration: 0, progress: 0, srEnabled: isSrEnabled, isPlaying: false, isStopped: !!currentSongStopped, waveHold: false, updatedAt: Date.now() };
             }
 
-            const playerDuration = player && player.getDuration ? Math.floor(player.getDuration()) : 0;
-            const duration = playerDuration > 0 ? playerDuration : (currentSongInfo.duration || 0);
-            const rawCurrentTime = player && player.getCurrentTime ? Math.max(0, player.getCurrentTime()) : 0;
+            const playback = getActivePlaybackState();
+            const duration = playback.duration > 0 ? playback.duration : (currentSongInfo.duration || 0);
+            const rawCurrentTime = Math.max(0, playback.currentTime || 0);
             const currentTime = Math.floor(rawCurrentTime);
-            const playerState = player && player.getPlayerState ? player.getPlayerState() : 0;
+            const playerState = playback.playerState;
             const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
             const activeWaveEffect = nowPlayingWaveEffectUntil > Date.now() ? nowPlayingWaveEffect : '';
-            const waveEnding = playerState === 1 && duration > 0 && (duration - rawCurrentTime) <= 1.8;
+            const waveEnding = playback.isPlaying && duration > 0 && (duration - rawCurrentTime) <= 1.8;
 
             return {
                 type: 'NOW_PLAYING_STATE',
                 hasSong: true,
                 id: currentSongInfo.id,
+                source: getSongSource(currentSongInfo),
+                sourceLabel: getSongSourceLabel(currentSongInfo),
+                link: getSongLink(currentSongInfo),
                 title: currentSongInfo.title || 'Unknown Title',
                 author: cleanAuthorName(currentSongInfo.author || 'YouTube'),
                 user: currentSongInfo.user || 'Auto',
-                thumbnail: 'https://i.ytimg.com/vi/' + currentSongInfo.id + '/mqdefault.jpg',
+                thumbnail: getSongThumbnail(currentSongInfo, 'mqdefault'),
                 currentTime,
                 duration,
                 progress,
-                isPlaying: playerState === 1,
+                srEnabled: isSrEnabled,
+                isPlaying: playback.isPlaying,
                 waveEnding,
                 waveEffect: activeWaveEffect,
                 waveEffectId: activeWaveEffect ? nowPlayingWaveEffectId : 0,
@@ -5161,7 +6467,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             resetVoteSkipVotes();
             nowPlayingWaveHoldUntilStart = false;
             triggerNowPlayingWaveEffect('fade', 900);
-            player.stopVideo();
+            stopActivePlayback().catch(() => {});
             document.getElementById('now-playing-title').innerText = t('ui_stop_state');
 
             stopTransitionTimeout = setTimeout(() => {
@@ -5193,8 +6499,23 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
         }
 
+        function handleSrRememberStateToggle() {
+            const rememberInput = document.getElementById('sr-remember-state-cb');
+            SHOULD_REMEMBER_SR_STATE = !!(rememberInput && rememberInput.checked);
+            localStorage.setItem(SR_REMEMBER_STATE_STORAGE_KEY, SHOULD_REMEMBER_SR_STATE ? 'true' : 'false');
+
+            if (SHOULD_REMEMBER_SR_STATE) {
+                localStorage.setItem(SR_ENABLED_STORAGE_KEY, isSrEnabled ? 'true' : 'false');
+            } else {
+                localStorage.removeItem(SR_ENABLED_STORAGE_KEY);
+            }
+        }
+
         function toggleSR(skipMsg = false) {
             isSrEnabled = document.getElementById('sr-toggle-cb').checked;
+            if (SHOULD_REMEMBER_SR_STATE) {
+                localStorage.setItem(SR_ENABLED_STORAGE_KEY, isSrEnabled ? 'true' : 'false');
+            }
             const textEl = document.getElementById('sr-status-text');
             if (isSrEnabled) {
                 textEl.innerText = " !SR ON";
@@ -5209,6 +6530,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
             if(!skipMsg) log(`SR Toggle: ${isSrEnabled}`, "warn");
             syncSongRequestSettingsToStreamerBot();
+            publishNowPlayingWidgetState(getActiveWidgetPublishState(), true);
         }
 
         var tag = document.createElement('script');
@@ -5234,8 +6556,59 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }, 3000);
         }
 
+        function rememberPlayerVolume(value) {
+            const normalized = Math.round(Math.min(100, Math.max(0, Number(value) || 0)));
+            PLAYER_VOLUME = normalized;
+            localStorage.setItem(PLAYER_VOLUME_STORAGE_KEY, String(normalized));
+            renderSpotifyVolumeControl();
+            return normalized;
+        }
+
+        function renderSpotifyVolumeControl() {
+            const slider = document.getElementById('spotify-player-volume-input');
+            const output = document.getElementById('spotify-player-volume-output');
+            const volume = PLAYER_VOLUME === null ? 80 : PLAYER_VOLUME;
+            if (slider && Number(slider.value) !== volume) slider.value = String(volume);
+            if (slider) slider.setAttribute('aria-label', t('ui_spotify_volume'));
+            if (output) output.value = `${volume}%`;
+        }
+
+        async function setSpotifyGuiVolume() {
+            const slider = document.getElementById('spotify-player-volume-input');
+            if (!slider) return;
+            const volume = rememberPlayerVolume(slider.value);
+            if (spotifyPlayer && spotifyPlayer.setVolume) {
+                try { await spotifyPlayer.setVolume(volume / 100); } catch (error) {}
+            }
+        }
+
+        function applyStoredPlayerVolume() {
+            if (PLAYER_VOLUME === null || !player || !player.setVolume) return;
+            player.setVolume(PLAYER_VOLUME);
+        }
+
+        async function syncPlayerVolumePreference() {
+            if (playerVolumeSyncPending) return;
+            playerVolumeSyncPending = true;
+            try {
+                let observedVolume = null;
+                if (currentSongInfo && isSpotifySong(currentSongInfo) && spotifyPlayer && spotifyPlayer.getVolume) {
+                    observedVolume = Math.round((await spotifyPlayer.getVolume()) * 100);
+                } else if (player && player.getVolume) {
+                    observedVolume = Math.round(player.getVolume());
+                }
+                if (Number.isFinite(observedVolume) && (PLAYER_VOLUME === null || observedVolume !== PLAYER_VOLUME)) {
+                    rememberPlayerVolume(observedVolume);
+                }
+            } catch (error) {
+            } finally {
+                playerVolumeSyncPending = false;
+            }
+        }
+
         async function onPlayerReady() {
-            connectWebsocket();
+            ensureWebsocketConnection();
+            applyStoredPlayerVolume();
             const restoredQueue = restorePersistedQueue();
             queuePersistenceReady = true;
             if (!restoredQueue) await loadInitialPlayerSong();
@@ -5243,7 +6616,12 @@ if (!WIDGET_EDITOR_PREVIEW) {
             if (!localStorage.getItem('ytm_tutorial_seen')) {
                 openTutorial();
             } else {
-                if (!checkApiSetup()) return; 
+                if (!API_KEY || API_KEY.trim() === '') {
+                    updateApiStatusUI('error');
+                    setBaseActionButtonMode('api-required');
+                    fetchFullPlaylistFromAPI();
+                    return;
+                }
                 let isValid = await verifyApiKey(API_KEY);
                 if(isValid) fetchFullPlaylistFromAPI();
                 else {
@@ -5261,9 +6639,10 @@ if (!WIDGET_EDITOR_PREVIEW) {
             currentSongStopped = false;
             resetVoteSkipVotes();
             currentSongInfo.isStartup = true;
+            renderPlayerSurface(currentSongInfo);
             player.cueVideoById(currentSongInfo.id);
             document.getElementById('now-playing-title').innerText = currentSongInfo.title;
-            document.getElementById('now-playing-meta').innerText = 'Auto';
+            setNowPlayingMeta(currentSongInfo);
             renderQueue();
         }
 
@@ -5306,6 +6685,114 @@ if (!WIDGET_EDITOR_PREVIEW) {
             cueStartupSong(DEFAULT_STARTUP_SONGS[Math.floor(Math.random() * DEFAULT_STARTUP_SONGS.length)]);
         }
 
+        function isSpotifySong(song) {
+            return getSongSource(song) === SONG_SOURCE_SPOTIFY;
+        }
+
+        function renderPlayerSurface(song) {
+            const spotifyView = document.getElementById('spotify-player-view');
+            const youtubeView = document.getElementById('player');
+            if (!spotifyView || !youtubeView) return;
+
+            const useSpotify = !!(song && isSpotifySong(song));
+            spotifyView.classList.toggle('is-hidden', !useSpotify);
+            youtubeView.classList.toggle('is-hidden', useSpotify);
+            renderSpotifyVolumeControl();
+
+            if (useSpotify) {
+                const cover = document.getElementById('spotify-player-cover');
+                const title = document.getElementById('spotify-player-title');
+                const author = document.getElementById('spotify-player-author');
+                if (cover) cover.src = getSongThumbnail(song, 'mqdefault');
+                if (title) title.innerText = song.title || 'Spotify';
+                if (author) author.innerText = cleanAuthorName(song.author || 'Spotify');
+            }
+        }
+
+        function playYoutubeSong(song) {
+            clearSpotifyPlaybackMonitor();
+            stopSpotifyPlayback().catch(() => {});
+            renderPlayerSurface(song);
+            if (!player || !player.loadVideoById) return;
+            if (PLAYER_VOLUME !== null && player.setVolume) player.setVolume(PLAYER_VOLUME);
+            currentSongStopped = false;
+            player.loadVideoById(getSongIdentityId(song));
+        }
+
+        async function playCurrentSong(song) {
+            if (!song) return;
+            if (isSpotifySong(song)) {
+                if (canTryNativeSpotifyPlayback()) {
+                    try {
+                        await playSpotifySong(song);
+                        return;
+                    } catch (error) {
+                        spotifyLastError = error.message || String(error);
+                        renderSpotifyStatus('ui_spotify_status_error');
+                    }
+                }
+
+                const fallbackDone = await fallbackSpotifySongToYoutube(song, { playNow: true });
+                if (!fallbackDone) playNext(playQueue.length === 0 ? 'shuffle' : basePlaybackMode);
+                return;
+            }
+
+            playYoutubeSong(song);
+        }
+
+        function getActivePlaybackState() {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) return getSpotifyPlaybackTiming();
+            const playerState = player && player.getPlayerState ? player.getPlayerState() : 0;
+            return {
+                duration: player && player.getDuration ? Math.floor(player.getDuration()) : (currentSongInfo ? currentSongInfo.duration || 0 : 0),
+                currentTime: player && player.getCurrentTime ? Math.floor(Math.max(0, player.getCurrentTime())) : 0,
+                isPlaying: playerState === 1,
+                playerState
+            };
+        }
+
+        function isActivePlaybackPlaying() {
+            return getActivePlaybackState().isPlaying;
+        }
+
+        async function pauseActivePlayback() {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) await pauseSpotifyPlayback();
+            else if (player && player.pauseVideo) player.pauseVideo();
+        }
+
+        async function resumeActivePlayback() {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) {
+                const spotifySong = currentSongInfo;
+                try {
+                    await resumeSpotifyPlayback(spotifySong);
+                } catch (error) {
+                    spotifyLastError = error.message || String(error);
+                    renderSpotifyStatus('ui_spotify_status_error');
+                    const fallbackDone = await fallbackSpotifySongToYoutube(spotifySong, { playNow: true });
+                    if (!fallbackDone) {
+                        showToast(t('ui_spotify_auth_failed', { error: spotifyLastError }), 'error', 9000);
+                    }
+                }
+            } else if (player && player.playVideo) {
+                player.playVideo();
+            }
+        }
+
+        async function stopActivePlayback() {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) await stopSpotifyPlayback();
+            else if (player && player.stopVideo) player.stopVideo();
+        }
+
+        async function seekActivePlayback(seconds) {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) {
+                if (spotifyPlayer && spotifyPlayer.seek) {
+                    try { await spotifyPlayer.seek(Math.max(0, seconds) * 1000); } catch (error) {}
+                }
+            } else if (player && player.seekTo) {
+                player.seekTo(Math.max(0, seconds));
+            }
+        }
+
         async function fetchFullPlaylistFromAPI() {
             if(savedPlaylists.length === 0) {
                 document.getElementById('base-list').innerHTML = `<div class="ex-style-068">${t('ui_empty_playlists')}</div>`;
@@ -5320,6 +6807,27 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             try {
                 for(let pObj of savedPlaylists) {
+                    const playlistSource = normalizeSongSource(pObj.source);
+                    if (playlistSource === SONG_SOURCE_SPOTIFY) {
+                        if (!SPOTIFY_ENABLED) continue;
+                        try {
+                            const spotifySongs = await fetchSpotifyPlaylistTracks(pObj.id);
+                            spotifySongs.forEach(song => {
+                                const key = cacheSongInfo(song);
+                                if (key && !masterList.includes(key)) masterList.push(key);
+                            });
+                        } catch (spotifyError) {
+                            log("Spotify playlist error: " + spotifyError.message, "error");
+                            const messageKey = spotifyError.status === 403
+                                ? 'ui_spotify_playlist_access_error'
+                                : 'ui_spotify_playlist_error';
+                            showToast(t(messageKey), 'error', 10000);
+                        }
+                        continue;
+                    }
+
+                    if (!API_KEY || API_KEY.trim() === '') continue;
+
                     let pid = pObj.id;
                     let nextPageToken = '';
                     do {
@@ -5354,9 +6862,10 @@ if (!WIDGET_EDITOR_PREVIEW) {
                                 let title = item.snippet.title;
                                 if(title === "Private video" || title === "Deleted video") return;
                                 
-                                if(!masterList.includes(id)) {
-                                    masterList.push(id);
-                                    titleCache[id] = { title: title, author: cleanAuthorName(item.snippet.videoOwnerChannelTitle), duration: durations[id] || 210 };
+                                const song = normalizeSongForStorage({ id, source: SONG_SOURCE_YOUTUBE, title: title, author: cleanAuthorName(item.snippet.videoOwnerChannelTitle), duration: durations[id] || 210 });
+                                const key = cacheSongInfo(song);
+                                if(key && !masterList.includes(key)) {
+                                    masterList.push(key);
                                 }
                             });
                         }
@@ -5385,7 +6894,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             return items.map(item => {
                 let info = item.info;
-                return info ? { id: item.id, title: info.title, author: info.author, user: "Auto", duration: info.duration } : null;
+                return info ? { ...info, user: "Auto", queueOrigin: item.queueOrigin || 'playlist' } : null;
             }).filter(Boolean);
         }
 
@@ -5402,10 +6911,12 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function startSystem() {
+            activateSpotifyPlaybackElement();
             startBasePlayback('ordered');
         }
 
         function startSystemShuffle() {
+            activateSpotifyPlaybackElement();
             startBasePlayback('shuffle');
         }
 
@@ -5421,11 +6932,15 @@ if (!WIDGET_EDITOR_PREVIEW) {
             if (playQueue.length > 0) {
                 currentSongInfo = playQueue.shift();
                 currentSongStopped = false;
-                player.loadVideoById(currentSongInfo.id);
+                playCurrentSong(currentSongInfo);
                 renderQueue();
             } else {
+                const previousSong = currentSongInfo;
                 currentSongInfo = null;
                 currentSongStopped = false;
+                if (previousSong && isSpotifySong(previousSong)) stopSpotifyPlayback().catch(() => {});
+                else stopActivePlayback().catch(() => {});
+                renderPlayerSurface(null);
                 document.getElementById('now-playing-title').innerText = t('ui_waiting_start');
                 document.getElementById('now-playing-meta').innerText = "---";
                 renderQueue();
@@ -5434,6 +6949,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function onPlayerStateChange(e) {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) return;
             if (e.data === 0) playNext(playQueue.length === 0 ? 'shuffle' : basePlaybackMode); 
             if (e.data === 2 && currentSongInfo && !currentSongStopped) {
                 triggerNowPlayingWaveEffect('fade', 900);
@@ -5445,7 +6961,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 stopTransitionTimeout = null;
                 clearNowPlayingWaveEffect();
                 document.getElementById('now-playing-title').innerText = currentSongInfo.title;
-                document.getElementById('now-playing-meta').innerText = currentSongInfo.user === "Auto" ? `Auto` : `👤 ${currentSongInfo.user}`;
+                setNowPlayingMeta(currentSongInfo);
                 publishNowPlayingWidgetStartupBurst();
             }
         }
@@ -5473,6 +6989,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
         
         function togglePlay() { 
+            activateSpotifyPlaybackElement();
             if (!currentSongInfo) {
                 if (playQueue.length === 0) {
                     if (getBasePoolItems().length > 0) startBasePlayback(basePlaybackMode);
@@ -5482,9 +6999,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 return;
             }
 
-            if(player.getPlayerState() === 1) {
+            if(isActivePlaybackPlaying()) {
                 triggerNowPlayingWaveEffect('fade', 900);
-                player.pauseVideo();
+                pauseActivePlayback();
             } 
             else {
                 currentSongStopped = false;
@@ -5492,7 +7009,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 clearTimeout(stopTransitionTimeout);
                 stopTransitionTimeout = null;
                 clearNowPlayingWaveEffect();
-                player.playVideo();
+                resumeActivePlayback();
             }
         }
         
@@ -5516,12 +7033,12 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 return;
             }
 
-            if (player.getPlayerState() !== 1) {
+            if (!isActivePlaybackPlaying()) {
                 currentSongStopped = false;
                 clearTimeout(stopTransitionTimeout);
                 stopTransitionTimeout = null;
                 clearNowPlayingWaveEffect();
-                player.playVideo();
+                resumeActivePlayback();
                 sendChatMessage(t('msg_resumed', {user: user}));
             } else {
                 sendChatMessage(t('msg_already_playing', {user: user}));
@@ -5529,9 +7046,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function pauseFromChat(user) {
-            if (currentSongInfo && player.getPlayerState() === 1) {
+            if (currentSongInfo && isActivePlaybackPlaying()) {
                 triggerNowPlayingWaveEffect('fade', 900);
-                player.pauseVideo();
+                pauseActivePlayback();
                 sendChatMessage(t('msg_paused', {user: user}));
             } else {
                 sendChatMessage(t('msg_already_paused', {user: user}));
@@ -5539,7 +7056,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
         }
 
         function stopFromChat(user) {
-            if (currentSongInfo && player.getPlayerState() !== 5) {
+            if (currentSongInfo && !currentSongStopped) {
                 stopCurrentSongWithWave();
                 sendChatMessage(t('msg_stopped', {user: user}));
             } else {
@@ -5553,26 +7070,16 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 currentSongInfo = playHistory.pop();
                 currentSongStopped = false;
                 resetVoteSkipVotes();
-                player.loadVideoById(currentSongInfo.id);
+                playCurrentSong(currentSongInfo);
                 renderQueue();
-            } else player.seekTo(0); 
+            } else seekActivePlayback(0); 
         }
 
         async function fetchAndAddById(videoId, user) {
-            if (!checkApiSetup()) return;
             try {
-                let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${API_KEY}`;
-                let res = await fetch(url);
-                let data = await res.json();
-                
-                if (data.error) {
-                     if (user !== "Streamer") sendChatMessage(t('msg_api_err', {user: user}));
-                     return;
-                }
-
-                if (data.items && data.items.length > 0) {
-                    let item = data.items[0];
-                    addSongFromChat({ id: videoId, user: user, title: item.snippet.title, author: cleanAuthorName(item.snippet.channelTitle), duration: parseISO8601Duration(item.contentDetails.duration) });
+                const song = await fetchYoutubeSongById(videoId, user);
+                if (song) {
+                    addSongFromChat(song);
                 } else {
                     if(user !== "Streamer") sendChatMessage(t('msg_not_found', {user: user}));
                 }
@@ -5581,13 +7088,26 @@ if (!WIDGET_EDITOR_PREVIEW) {
             }
         }
 
-        function addManualUrl() {
+        async function addManualUrl() {
             const inputEl = document.getElementById('manual-url');
             const url = inputEl.value.trim();
             if(!url) return;
+            const spotify = parseSpotifyUrl(url);
+            if (spotify && spotify.type === 'track') {
+                inputEl.value = "";
+                await addSpotifyTrackRequest({ id: spotify.id, spotifyUrl: spotify.url, input: url, user: "Streamer" }, true);
+                return;
+            }
             const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
             const videoId = match ? match[1] : (url.length === 11 ? url : null);
-            if(!videoId) return;
+            if(!videoId) {
+                const found = await fetchYoutubeSongByQuery(url, "Streamer");
+                if (found) {
+                    inputEl.value = "";
+                    addSongFromChat(found);
+                }
+                return;
+            }
             inputEl.value = ""; 
             fetchAndAddById(videoId, "Streamer");
         }
@@ -5666,6 +7186,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function addSongFromChat(songObj, force = false) {
             songObj = attachChatTargetToSong(songObj);
             if(songObj.author) songObj.author = cleanAuthorName(songObj.author);
+            songObj = normalizeSongForStorage(songObj);
+            if (!songObj) return;
             if (!force && songObj.user !== "Streamer" && songObj.duration && songObj.duration > SR_MAX_DURATION_MINUTES * 60) {
                 sendChatMessage(t('msg_err_long', {user: songObj.user, info: Math.ceil(songObj.duration / 60), limit: SR_MAX_DURATION_MINUTES}));
                 return;
@@ -5683,7 +7205,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             log(`➕ Added: "${songObj.title}" by ${songObj.user}`, "normal");
 
             let etaSeconds = 0;
-            if (player.getPlayerState() === 1 && player.getDuration() > 0) etaSeconds += (player.getDuration() - player.getCurrentTime());
+            if (currentSongInfo && isActivePlaybackPlaying()) etaSeconds += getCurrentSongRemainingSeconds();
             for(let i = 0; i < insertIndex; i++) etaSeconds += playQueue[i].duration || 210;
 
             let displayPosition = insertIndex + 2; 
@@ -5736,7 +7258,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     author: currentSongInfo.author,
                     title: currentSongInfo.title,
                     adder: currentSongInfo.user,
-                    link: `https://youtu.be/${currentSongInfo.id}`
+                    link: getSongLink(currentSongInfo)
                 }));
             }
             else sendChatMessage(t('msg_nothing_playing', {user: user}));
@@ -5745,12 +7267,9 @@ if (!WIDGET_EDITOR_PREVIEW) {
         function getCurrentSongRemainingSeconds() {
             if (!currentSongInfo) return 0;
             const fallbackDuration = currentSongInfo.duration || 210;
-            let duration = fallbackDuration;
-            let currentTime = 0;
-            try {
-                if (player && typeof player.getDuration === 'function') duration = player.getDuration() || fallbackDuration;
-                if (player && typeof player.getCurrentTime === 'function') currentTime = player.getCurrentTime() || 0;
-            } catch (error) {}
+            const playback = getActivePlaybackState();
+            let duration = playback.duration || fallbackDuration;
+            let currentTime = playback.currentTime || 0;
             return Math.max(0, Math.round(duration - currentTime));
         }
 
@@ -5884,7 +7403,22 @@ if (!WIDGET_EDITOR_PREVIEW) {
             } else sendChatMessage(t('msg_wrong_none', {user: user}));
         }
 
-        function handleVolume(data) {
+        async function handleVolume(data) {
+            if (currentSongInfo && isSpotifySong(currentSongInfo)) {
+                if (!spotifyPlayer || !spotifyPlayer.getVolume) return;
+                let currentSpotifyVol = Math.round((await spotifyPlayer.getVolume()) * 100);
+                let newSpotifyVol = currentSpotifyVol;
+                if (data.mode === "add") newSpotifyVol = currentSpotifyVol + data.value;
+                else if (data.mode === "sub") newSpotifyVol = currentSpotifyVol - data.value;
+                else if (data.mode === "set") newSpotifyVol = data.value;
+                if (newSpotifyVol > 100) newSpotifyVol = 100; if (newSpotifyVol < 0) newSpotifyVol = 0;
+                if (data.mode !== "get") {
+                    await spotifyPlayer.setVolume(newSpotifyVol / 100);
+                    rememberPlayerVolume(newSpotifyVol);
+                    sendChatMessage(t('msg_vol', {user: data.user, vol: newSpotifyVol}));
+                } else sendChatMessage(t('msg_vol', {user: data.user, vol: currentSpotifyVol}));
+                return;
+            }
             if (!player || !player.getVolume) return;
             let currentVol = player.getVolume();
             let newVol = currentVol;
@@ -5894,6 +7428,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             if (newVol > 100) newVol = 100; if (newVol < 0) newVol = 0;
             if (data.mode !== "get") {
                 player.setVolume(newVol);
+                rememberPlayerVolume(newVol);
                 sendChatMessage(t('msg_vol', {user: data.user, vol: newVol}));
             } else sendChatMessage(t('msg_vol', {user: data.user, vol: currentVol}));
         }
@@ -5962,7 +7497,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             if (currentSongInfo) {
                 nowPlayingBox.innerHTML = renderNowPlayingCard(currentSongInfo, { prefix: 'panel-now-playing', dropTarget: true, showBan: true, showFavorite: true, className: 'panel-card' });
-                applyCoverThemeToNowPlayingCard(document.getElementById('panel-now-playing-card'), 'https://i.ytimg.com/vi/' + currentSongInfo.id + '/mqdefault.jpg');
+                applyCoverThemeToNowPlayingCard(document.getElementById('panel-now-playing-card'), getSongThumbnail(currentSongInfo, 'mqdefault'));
             } else nowPlayingBox.innerHTML = `<div class="ex-style-013">${t('ui_no_song')}</div>`;
 
             updateNowPlayingProgress();
@@ -5982,23 +7517,32 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 }
                 let animClass = song.isNew ? "animate-in" : "";
                 if (song.isNew) setTimeout(() => { song.isNew = false; }, 500); 
+                const thumbnail = escapeHtml(getSongThumbnail(song));
+                const source = getSongSource(song);
+                const sourceLabel = escapeHtml(getSongSourceLabel(song));
+                const sourceIcon = escapeHtml(getSongSourceIcon(song));
+                const chatSourceClass = getSongChatSourceClass(song);
+                const sourceClass = ` source-${source}`;
+                const originClass = ` origin-${getSongQueueOrigin(song)}`;
+                const favoriteClass = isFavoriteSong(song) ? ' favorite-track' : '';
 
                 return `
-                <div class="q-item ${typeClass} ${animClass}" draggable="true" data-index="${i}" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
-                    <div class="queue-drag-handle" aria-hidden="true">☰</div>
+                <div class="q-item has-drag-handle ${typeClass} ${animClass}${chatSourceClass}${sourceClass}${originClass}${favoriteClass}" draggable="true" data-index="${i}" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                    <div class="queue-drag-handle" aria-hidden="true">&#9776;</div>
                     <div class="track-num">${i + 2}.</div>
-                    <img src="https://i.ytimg.com/vi/${song.id}/default.jpg">
+                    <img src="${thumbnail}">
                     <div class="track-info">
                         <div class="track-title">${escapeHtml(song.title)}</div>
+                        <span class="badge badge-time track-time-badge">${formatTime(song.duration)}</span>
                         <div class="track-meta">
-                            <span class="badge badge-time">${formatTime(song.duration)}</span>
-                            ${song.user !== 'Auto' ? `<span class="${badgeClass}">👤 ${escapeHtml(song.user)}</span>` : `<span class="badge badge-auto">🤖 Auto</span>`}
-                            <span class="badge badge-author">🎤 ${escapeHtml(song.author)}</span>
+                            <span class="badge badge-source badge-source-${source}" title="${sourceLabel}" aria-label="${sourceLabel}">${sourceIcon}</span>
+                            ${song.user !== 'Auto' ? `<span class="${badgeClass}">${getSongRequesterHtml(song)}</span>` : `<span class="badge badge-auto"><span class="badge-auto-label">${getSongRequesterHtml(song)}</span></span>`}
+                            <span class="badge badge-author">&#127908; ${escapeHtml(song.author)}</span>
                         </div>
                     </div>
-                    ${renderFavoriteButton(song.id, `toggleFavoriteFromQueue(${i})`)}
-                    <button class="btn-ban" onclick="banSong(${i})" title="Ban">🔨</button>
-                    <button class="btn-remove" onclick="removeSongFromUI(${i})" title="Remove">❌</button>
+                    ${renderFavoriteButton(song, `data-favorite-action="queue" data-song-index="${i}"`)}
+                    <button class="btn-ban" onclick="banSong(${i})" title="Ban">&#128296;</button>
+                    <button class="btn-remove" onclick="removeSongFromUI(${i})" title="Remove">&#10006;</button>
                 </div>`;
             }).join('');
             savePersistedQueue();
@@ -6036,27 +7580,36 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
             container.innerHTML = filteredList.map((item) => {
                 let id = item.id;
+                let key = item.key || getSongKey(item.info || id);
                 let info = item.info;
                 let trackNumber = item.isFavorite ? `${item.favoriteIndex + 1}.` : `${item.originalIndex}.`;
                 let favoriteClass = item.isFavorite ? ' favorite-track' : '';
                 let favoriteDragAttrs = item.isFavorite ? ` draggable="true" data-favorite-index="${item.favoriteIndex}" ondragstart="handleFavoriteDragStart(event)" ondragover="handleFavoriteDragOver(event)" ondragleave="handleFavoriteDragLeave(event)" ondrop="handleFavoriteDrop(event)" ondragend="handleFavoriteDragEnd(event)"` : '';
-                let favoriteHandle = item.isFavorite ? '<div class="favorite-drag-handle" aria-hidden="true">☰</div>' : '';
+                let thumbnail = escapeHtml(getSongThumbnail(info));
+                let source = getSongSource(info);
+                let sourceLabel = escapeHtml(getSongSourceLabel(info));
+                let sourceIcon = escapeHtml(getSongSourceIcon(info));
+                let sourceClass = ` source-${source}`;
+                let originClass = ` origin-${item.queueOrigin || getSongQueueOrigin(info, 'playlist')}`;
+                let dragHandleClass = item.isFavorite ? ' has-drag-handle' : '';
+                let favoriteHandle = item.isFavorite ? '<div class="favorite-drag-handle" aria-hidden="true">&#9776;</div>' : '';
                 
                 return `
-                <div class="q-item compact${favoriteClass}"${favoriteDragAttrs}>
+                <div class="q-item compact${favoriteClass}${sourceClass}${originClass}${dragHandleClass}"${favoriteDragAttrs}>
                     ${favoriteHandle}
                     <div class="track-num" title="Base ID">${trackNumber}</div>
-                    <img src="https://i.ytimg.com/vi/${id}/default.jpg">
+                    <img src="${thumbnail}">
                     <div class="track-info">
                         <div class="track-title" title="${escapeHtml(info.title)}">${escapeHtml(info.title)}</div>
+                        <span class="badge badge-time track-time-badge">${formatTime(info.duration)}</span>
                         <div class="track-meta">
-                            <span class="badge badge-time">${formatTime(info.duration)}</span>
-                            <span class="badge badge-author">🎤 ${escapeHtml(info.author)}</span>
-                            ${item.isFavorite ? `<span class="badge badge-favorite">${t('ui_favorites_label')}</span>` : ''}
+                            <span class="badge badge-source badge-source-${source}" title="${sourceLabel}" aria-label="${sourceLabel}">${sourceIcon}</span>
+                            <span class="badge badge-auto"><span class="badge-auto-label">${getSongRequesterHtml('Auto')}</span></span>
+                            <span class="badge badge-author">&#127908; ${escapeHtml(info.author)}</span>
                         </div>
                     </div>
-                    ${renderFavoriteButton(id, `toggleFavoriteFromBase('${id}')`)}
-                    <button class="btn-add" onclick="addBaseSongToQueue('${id}')" title="Add">+</button>
+                    ${renderFavoriteButton(info, `data-favorite-action="base" data-song-key="${escapeHtml(key)}"`)}
+                    <button type="button" class="btn-add" draggable="false" data-add-song-action="base" data-song-key="${escapeHtml(key)}" title="Add">+</button>
                 </div>`;
             }).join('');
         }
@@ -6083,6 +7636,11 @@ if (!WIDGET_EDITOR_PREVIEW) {
 
         function canUseStreamerBotWebsocket() {
             return !!(ws && ws.readyState === WebSocket.OPEN && wsStreamerBotReady);
+        }
+
+        function ensureWebsocketConnection() {
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+            connectWebsocket();
         }
 
         function setWebsocketConnecting() {
@@ -6208,12 +7766,25 @@ if (!WIDGET_EDITOR_PREVIEW) {
                             }
                             else if (inner.type === "SONG_REQUEST") {
                                 if (!isSrEnabled) sendChatMessage(t('msg_sr_disabled', {user: inner.user}));
-                                else if (bannedSongs.some(b => b.id === inner.id)) sendChatMessage(t('msg_sr_banned', {user: inner.user}));
+                                else if (bannedSongs.some(b => getSongKey(b) === getSongKey(inner))) sendChatMessage(t('msg_sr_banned', {user: inner.user}));
                                 else {
-                                    let isDuplicate = playQueue.some(song => song.id === inner.id && song.user !== "Auto" && song.user !== "Streamer");
-                                    let isCurrentDuplicate = currentSongInfo && currentSongInfo.id === inner.id && currentSongInfo.user !== "Auto" && currentSongInfo.user !== "Streamer";
+                                    let requestKey = getSongKey(inner);
+                                    let isDuplicate = playQueue.some(song => getSongKey(song) === requestKey && song.user !== "Auto" && song.user !== "Streamer");
+                                    let isCurrentDuplicate = currentSongInfo && getSongKey(currentSongInfo) === requestKey && currentSongInfo.user !== "Auto" && currentSongInfo.user !== "Streamer";
                                     if (isDuplicate || isCurrentDuplicate) sendChatMessage(t('msg_sr_dupe', {user: inner.user}));
                                     else addSongFromChat(inner);
+                                }
+                            }
+                            else if (inner.type === "SPOTIFY_SONG_REQUEST") {
+                                if (!isSrEnabled) sendChatMessage(t('msg_sr_disabled', {user: inner.user}));
+                                else {
+                                    const spotifyKey = getSongKeyFromParts(SONG_SOURCE_SPOTIFY, inner.spotifyId || inner.id);
+                                    const isBanned = bannedSongs.some(b => getSongKey(b) === spotifyKey);
+                                    const isDuplicate = playQueue.some(song => getSongKey(song) === spotifyKey && song.user !== "Auto" && song.user !== "Streamer");
+                                    const isCurrentDuplicate = currentSongInfo && getSongKey(currentSongInfo) === spotifyKey && currentSongInfo.user !== "Auto" && currentSongInfo.user !== "Streamer";
+                                    if (isBanned) sendChatMessage(t('msg_sr_banned', {user: inner.user}));
+                                    else if (isDuplicate || isCurrentDuplicate) sendChatMessage(t('msg_sr_dupe', {user: inner.user}));
+                                    else await addSpotifyTrackRequest(inner);
                                 }
                             }
                             else if (inner.type === "SONG_REQUEST_FORCE") addSongFromChat(inner, true); 
