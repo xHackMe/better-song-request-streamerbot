@@ -3024,6 +3024,38 @@ body:not(.now-playing-widget-page) .toast-close {
     font-weight: 1000;
 }
 
+body:not(.now-playing-widget-page) .toast-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body:not(.now-playing-widget-page) .toast-action {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    padding: 0;
+    color: var(--bsr-ink);
+    background: var(--bsr-yellow);
+    border: 2px solid var(--bsr-ink);
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+body:not(.now-playing-widget-page) .toast-import-action {
+    color: #fff4dd;
+    background: var(--bsr-red);
+}
+
+body:not(.now-playing-widget-page) .toast-action:hover {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
 body:not(.now-playing-widget-page) .bottom-zone {
     position: relative;
     z-index: 2;

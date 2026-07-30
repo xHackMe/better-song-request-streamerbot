@@ -2403,7 +2403,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const url = new URL('now-playing-widget.html', window.location.href);
             url.searchParams.set('editor', '1');
             url.searchParams.set('lang', currentLang || 'en');
-    url.searchParams.set('v', '20260731-uiR39');
+    url.searchParams.set('v', '20260731-uiR41');
             return url.toString();
         }
 
@@ -3433,7 +3433,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
             });
         }
 
-        function showToast(message, type = 'normal', durationMs = 6500) {
+        function showToast(message, type = 'normal', durationMs = 6500, options = {}) {
             const rootEl = document.getElementById('toast-root');
             if (!rootEl) return;
             const toast = document.createElement('div');
@@ -3443,6 +3443,28 @@ if (!WIDGET_EDITOR_PREVIEW) {
             messageEl.className = 'toast-message';
             messageEl.textContent = message;
             toast.appendChild(messageEl);
+            let actionsEl = null;
+            const getActionsEl = () => {
+                if (actionsEl) return actionsEl;
+                actionsEl = document.createElement('div');
+                actionsEl.className = 'toast-actions';
+                toast.appendChild(actionsEl);
+                return actionsEl;
+            };
+            if (typeof options.onAction === 'function') {
+                const actionEl = document.createElement('button');
+                actionEl.type = 'button';
+                actionEl.className = 'toast-action toast-import-action';
+                actionEl.textContent = options.actionIcon || '⚙️';
+                actionEl.title = options.actionTitle || '';
+                actionEl.setAttribute('aria-label', options.actionTitle || '');
+                actionEl.addEventListener('click', event => {
+                    event.stopPropagation();
+                    toast.remove();
+                    options.onAction();
+                });
+                getActionsEl().appendChild(actionEl);
+            }
             if (isError) {
                 const closeEl = document.createElement('button');
                 closeEl.type = 'button';
@@ -3453,7 +3475,7 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     toast.remove();
                 });
                 toast.addEventListener('click', () => toast.remove());
-                toast.appendChild(closeEl);
+                getActionsEl().appendChild(closeEl);
             }
             rootEl.appendChild(toast);
             if (isError) return;
@@ -3462,6 +3484,22 @@ if (!WIDGET_EDITOR_PREVIEW) {
                 toast.style.transform = 'translateY(8px)';
                 setTimeout(() => toast.remove(), 180);
             }, Math.max(1200, durationMs));
+        }
+
+        function openStreamerBotImportHelp() {
+            openTutorial();
+            requestAnimationFrame(() => {
+                const importSection = document.getElementById('streamerbot-import-help');
+                if (importSection) importSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        function showImportRequiredToast(message) {
+            showToast(message, 'error', 6500, {
+                actionIcon: '⚙️',
+                actionTitle: t('ui_tut_4_title'),
+                onAction: openStreamerBotImportHelp
+            });
         }
 
         function showConfirm(message, onConfirm, options = {}) {
@@ -3730,7 +3768,8 @@ if (!WIDGET_EDITOR_PREVIEW) {
             const toastKey = `${importStatusState}|${message}`;
             if (toastKey !== lastImportStatusToastKey && importStatusState !== 'checking') {
                 lastImportStatusToastKey = toastKey;
-                showToast(message, importStatusState === 'missing' ? 'error' : (toneClass === 'is-warn' ? 'warn' : 'normal'));
+                if (importStatusState === 'missing') showImportRequiredToast(message);
+                else showToast(message, toneClass === 'is-warn' ? 'warn' : 'normal');
             }
         }
 
@@ -3810,14 +3849,13 @@ if (!WIDGET_EDITOR_PREVIEW) {
                     'YtmImportDiagnostics'
                 ];
                 setImportStatus('missing', missing);
-                if (!silent) showToast(t('ui_import_required'), 'error');
                 return { ok: false, version: '', missing };
             }
 
             const componentInspection = await inspectStreamerBotImportComponents();
             const result = getImportValidationResult(payload, componentInspection);
             setImportStatus(result.ok ? 'ok' : 'missing', result.missing, result.version);
-            if (!silent) showToast(result.ok ? t('ui_import_status_ok') : t('ui_import_required'), result.ok ? 'ok' : 'error');
+            if (!silent && result.ok) showToast(t('ui_import_status_ok'), 'ok');
             return result;
         }
 

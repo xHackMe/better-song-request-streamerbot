@@ -4,7 +4,7 @@ Release v2.0.0
 NEW Added Spotify integration using OAuth, Spotify Web Playback SDK, and Spotify Premium playback.
 NEW Added Spotify playlist support in the base playlist manager.
 NEW Added Spotify track link support for !sr through the Streamer.bot import.
-NEW Added source badges so songs show whether they come from YouTube or Spotify.
+NEW Added Source badges so songs show whether they come from YouTube or Spotify.
 NEW Added YouTube fallback for Spotify requests when native Spotify playback is unavailable.
 NEW Added an editable !SR status badge to the OBS widget and widget editor.
 NEW Added a variable to store the player's volume setting.
